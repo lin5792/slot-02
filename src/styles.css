@@ -27,8 +27,9 @@
   color-scheme: light;
 }
 
+/* 시스템 설정을 따르되, 앱을 감싸는 화면이 data-theme을 정하면 그쪽을 따른다 */
 @media (prefers-color-scheme: dark) {
-  :root {
+  :root:not([data-theme="light"]) {
     --bg: #14131f;
     --surface: #1d1b2e;
     --surface-2: #27243c;
@@ -50,6 +51,27 @@
     color-scheme: dark;
   }
 }
+:root[data-theme="dark"] {
+  --bg: #14131f;
+  --surface: #1d1b2e;
+  --surface-2: #27243c;
+  --text: #f4f1ff;
+  --muted: #a6a1c2;
+  --line: #34304d;
+  --accent: #ff8a3d;
+  --accent-ink: #1d1b2e;
+  --xp: #9b85ff;
+  --good: #3cc68e;
+  --warn: #f0a63a;
+  --bad: #ff6b6b;
+  --l0: #8a98ad;
+  --l1: #2cc4b4;
+  --l2: #f0a63a;
+  --l3: #9b85ff;
+  --t-miss: #2c2942;
+  --shadow: none;
+  color-scheme: dark;
+}
 
 * { box-sizing: border-box; }
 html, body { margin: 0; }
@@ -68,7 +90,9 @@ button, input, select, textarea { font: inherit; color: inherit; }
   max-width: 560px;
   margin: 0 auto;
   min-height: 100dvh;
-  padding: calc(env(safe-area-inset-top) + 12px) 16px calc(env(safe-area-inset-bottom) + 92px);
+  padding-block: calc(env(safe-area-inset-top) + 12px) calc(env(safe-area-inset-bottom) + 92px);
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
 }
 
 h1, h2, h3 { margin: 0; line-height: 1.25; }

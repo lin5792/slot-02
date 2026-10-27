@@ -30,7 +30,7 @@ export default function App() {
     history.replaceState(null, '', `#${t}`)
     window.scrollTo({ top: 0 })
   }
-  const { needRefresh: [needRefresh], updateServiceWorker } = useRegisterSW()
+  const { needRefresh: [needRefresh], updateServiceWorker } = useRegisterSW({ onRegisterError: () => {} })
 
   if (!data.loaded) return <div className="app" />
   if (data.habits.length === 0) return <main className="app"><Onboarding data={data} /></main>
