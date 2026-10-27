@@ -3,9 +3,9 @@ import type { AppData } from '../hooks'
 import { addDays, fromMin, toMin } from '../domain/time'
 import type { Habit, IfThen, Weekday } from '../domain/types'
 import {
-  backstopFor, createHabit, exportAll, importAll, promoteHabit, saveBlock, saveSettings, updateHabit, upsertEventsFromIcs,
+  backstopFor, createHabit, exportAll, importAll, promoteHabit, saveBlock, saveSettings, updateHabit,
 } from '../db/queries'
-import { NOTIFY_READY, buildIcs, parseIcs, requestNotificationPermission, scheduleLocalReminders } from '../notify'
+import { NotifyPanel } from '../notify/NotifyPanel'
 import { useToast } from '../ui/common'
 
 type HabitDraft = Omit<Habit, 'id' | 'createdAt' | 'status' | 'extensions'>
@@ -117,7 +117,6 @@ export function Setup({ data }: { data: AppData }) {
   const drafts = data.habits.filter(h => h.status === 'draft')
   const settled = data.habits.filter(h => h.status === 'settled')
   const [adding, setAdding] = useState(false)
-  const [perm, setPerm] = useState(typeof Notification !== 'undefined' ? Notification.permission : 'denied')
 
   return (
     <div className="stack-lg">
@@ -171,29 +170,7 @@ export function Setup({ data }: { data: AppData }) {
         </div>
       </section>
 
-      <section className="card stack">
-        <h3>알림 · 캘린더</h3>
-        {!NOTIFY_READY && <p className="small muted">알림·캘린더 연동 모듈을 붙이는 중이다. 알림 권한만 미리 받을 수 있다.</p>}
-        <div className="row wrap">
-          <button className="btn sm" disabled={perm === 'granted'} onClick={async () => {
-            const r = await requestNotificationPermission()
-            setPerm(r)
-            if (r === 'granted' && habit && NOTIFY_READY) await scheduleLocalReminders(habit, settings)
-          }}>{perm === 'granted' ? '알림 허용됨' : '알림 허용'}</button>
-          <button className="btn sm" disabled={!NOTIFY_READY || !habit} onClick={() => {
-            download('habit-quest.ics', buildIcs(data.blocks, habit!, settings), 'text/calendar')
-          }}>.ics 내보내기</button>
-          <label className={`btn sm ${NOTIFY_READY ? '' : 'disabled'}`} style={{ opacity: NOTIFY_READY ? 1 : .45 }}>
-            캘린더 가져오기
-            <input type="file" accept=".ics,text/calendar" hidden disabled={!NOTIFY_READY} onChange={async e => {
-              const file = e.target.files?.[0]
-              if (!file) return
-              const n = await upsertEventsFromIcs(parseIcs(await file.text()))
-              toast(`이벤트 ${n}개를 새로 가져왔다`)
-            }} />
-          </label>
-        </div>
-      </section>
+      <NotifyPanel habit={habit} blocks={data.blocks} settings={settings} />
 
       <section className="card stack">
         <h3>백업</h3>

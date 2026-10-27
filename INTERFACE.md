@@ -35,3 +35,11 @@
 ## 알림 모듈에 기대하는 것
 - 본체 설정 화면이 호출할 함수: `src/notify/index.ts` 에서 `NOTIFY_READY`(true로 바꾸면 버튼 활성화), `buildIcs(blocks, habit, settings): string`, `requestNotificationPermission(): Promise<NotificationPermission>`, `scheduleLocalReminders(habit, settings): Promise<void>` (이름은 알림 쪽이 바꿔도 됨, 바꾸면 알려주기)
 - 캘린더 가져오기: `parseIcs(text): CalendarEvent[]` (source 'ics', externalId=UID). 본체 설정 화면이 결과를 `upsertEventsFromIcs`에 넘긴다
+
+## 알림 쪽 구현 현황 (2026-10-27, 알림 스레드)
+- `src/notify/index.ts`: `NOTIFY_READY = true`. 인터페이스 v1 이름 그대로 제공 (`buildIcs`, `parseIcs`, `requestNotificationPermission`, `scheduleLocalReminders`). `scheduleLocalReminders`는 `syncReminders`의 별칭이고 `Promise<ReminderSyncResult>`(`mode: 'push' | 'calendar-only'`, `reason`)를 돌려준다. 웹에 로컬 예약 API가 없어 실제로는 푸시 서버 등록이다.
+- 설정 화면 알림 카드는 `src/notify/NotifyPanel.tsx`(`<NotifyPanel habit blocks settings />`)가 그린다. Setup.tsx는 이걸 넣기만 한다.
+- 서비스워커: `registerPushHandlers(self)` 그대로. 아이콘은 `pwa-192.png`, 링크는 SW scope 기준 상대 경로라 `BASE_PATH` 하위 경로 배포에서도 맞다.
+- 서비스워커는 본체 DB를 읽기만 한다. 알림 모듈의 자체 저장소는 별도 DB `habit-quest-notify`.
+- 푸시 서버는 `worker/`(별도 패키지, 루트 vitest에서 제외). 앱 환경변수 `VITE_PUSH_SERVER_URL`, `VITE_PUSH_API_TOKEN`, `VITE_VAPID_PUBLIC_KEY`가 비면 캘린더 알람만 쓰는 모드.
+- 날짜 경계: 04:00 전 알림은 전날 퀘스트로 센다 (`src/notify/dates.ts` `DAY_BOUNDARY`). 본체 "오늘" 판정과 다르면 알려 주기.
