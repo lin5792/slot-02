@@ -6,8 +6,14 @@ export function toISO(d: Date): ISODate {
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`
 }
 
+/**
+ * 하루는 04:00에 바뀐다. 자정을 넘겨 백스톱 퀘스트를 한 기록은 전날 몫이다.
+ * 알림 모듈의 DAY_BOUNDARY(src/notify/dates.ts)와 같은 값이다.
+ */
+export const DAY_START_HOUR = 4
+
 export function todayISO(now: Date = new Date()): ISODate {
-  return toISO(now)
+  return toISO(new Date(now.getTime() - DAY_START_HOUR * 3_600_000))
 }
 
 /** 로컬 정오로 만든다. 서머타임 경계에서도 날짜 계산이 밀리지 않게. */
