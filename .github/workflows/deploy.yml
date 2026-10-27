@@ -28,6 +28,9 @@ jobs:
       - run: npm run build
         env:
           BASE_PATH: /${{ github.event.repository.name }}/
+          # 푸시 서버(worker/)를 배포한 뒤 저장소 변수를 채우면 켜진다. 비어 있으면 캘린더 알람 모드
+          VITE_PUSH_SERVER_URL: ${{ vars.VITE_PUSH_SERVER_URL }}
+          VITE_VAPID_PUBLIC_KEY: ${{ vars.VITE_VAPID_PUBLIC_KEY }}
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:
