@@ -1,0 +1,9 @@
+.env
+.secrets/
+__pycache__/
+node_modules/
+.venv/
+venv/
+*.safetensors
+*.pt
+*.ckpt
