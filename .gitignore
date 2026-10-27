@@ -4,3 +4,5 @@ dev-dist
 *.local
 worker/node_modules
 worker/.wrangler
+.env
+.secrets/
