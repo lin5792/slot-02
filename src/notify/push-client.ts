@@ -5,8 +5,8 @@
 // 이 파일은 (2)를 담당하고, 서버 설정이 없으면 캘린더만 쓰는 모드로 알려준다.
 
 import type { Habit, Settings } from '../domain/types'
-import { deleteSubscription, putSubscription, sendTestPush, type PushServerConfig } from './push-api'
-import { getSyncState, setSyncState } from './push-store'
+import { deleteSubscription, pingServer, putSubscription, sendTestPush, type PushServerConfig } from './push-api'
+import { getConnectCode, getSyncState, setConnectCode, setSyncState } from './push-store'
 import { buildReminderPlan, type ReminderPlan } from './schedule'
 import { deviceTimeZone, localTodayISO } from './dates'
 
@@ -18,6 +18,7 @@ export type ReminderSyncReason =
   | Extract<PushSupport, { ok: false }>['reason']
   | 'permission-denied'
   | 'no-active-habit'
+  | 'needs-connect-code'
 
 export interface ReminderSyncResult {
   /** push: 서버 푸시 등록됨. calendar-only: 캘린더 알람만 쓴다 */
@@ -26,14 +27,33 @@ export interface ReminderSyncResult {
   plan?: ReminderPlan
 }
 
-/** Vite 환경변수에서 푸시 서버 설정을 읽는다. 하나라도 비면 null */
+export type PushServerEnv = Omit<PushServerConfig, 'apiToken'>
+
+/** Vite 환경변수에서 푸시 서버 주소와 VAPID 공개키를 읽는다 (둘 다 공개값). 하나라도 비면 null */
 export function configFromEnv(
   env: Record<string, string | undefined> = (import.meta as { env?: Record<string, string | undefined> }).env ?? {},
-): PushServerConfig | null {
+): PushServerEnv | null {
   const serverUrl = env.VITE_PUSH_SERVER_URL
-  const apiToken = env.VITE_PUSH_API_TOKEN
   const vapidPublicKey = env.VITE_VAPID_PUBLIC_KEY
-  return serverUrl && apiToken && vapidPublicKey ? { serverUrl, apiToken, vapidPublicKey } : null
+  return serverUrl && vapidPublicKey ? { serverUrl, vapidPublicKey } : null
+}
+
+/** 서버 주소(환경변수) + 이 기기에 저장한 연결 코드. 코드가 없으면 null */
+export async function loadConfig(server = configFromEnv()): Promise<PushServerConfig | null> {
+  if (!server) return null
+  const apiToken = await getConnectCode().catch(() => undefined)
+  return apiToken ? { ...server, apiToken } : null
+}
+
+/** 연결 코드를 서버에 확인하고 이 기기에 저장한다 */
+export async function connectServer(code: string, server = configFromEnv()): Promise<PushServerConfig> {
+  if (!server) throw new Error('푸시 서버 주소가 설정되지 않았습니다')
+  const config = { ...server, apiToken: code.trim() }
+  await pingServer(config).catch(() => {
+    throw new Error('연결 코드가 맞지 않습니다')
+  })
+  await setConnectCode(config.apiToken)
+  return config
 }
 
 function isIOS(nav: Navigator): boolean {
@@ -51,8 +71,8 @@ function isStandalone(win: Window): boolean {
  * iOS·iPadOS 16.4+는 홈 화면에 추가한 웹 앱에서만 웹 푸시가 된다.
  * https://webkit.org/blog/13878/web-push-for-web-apps-on-ios-and-ipados/
  */
-export function getPushSupport(win: Window = window, config = configFromEnv()): PushSupport {
-  if (!config) return { ok: false, reason: 'not-configured' }
+export function getPushSupport(win: Window = window, server: PushServerEnv | null = configFromEnv()): PushSupport {
+  if (!server) return { ok: false, reason: 'not-configured' }
   if (!('serviceWorker' in win.navigator)) return { ok: false, reason: 'no-service-worker' }
   if (isIOS(win.navigator) && !isStandalone(win)) return { ok: false, reason: 'ios-needs-home-screen' }
   if (!('PushManager' in win) || !('Notification' in win)) return { ok: false, reason: 'no-push' }
@@ -74,7 +94,7 @@ function base64UrlToBytes(s: string): Uint8Array<ArrayBuffer> {
   return out
 }
 
-async function ensureSubscription(config: PushServerConfig): Promise<PushSubscription> {
+async function ensureSubscription(config: PushServerEnv): Promise<PushSubscription> {
   const reg = await navigator.serviceWorker.ready
   const existing = await reg.pushManager.getSubscription()
   if (existing) return existing
@@ -98,30 +118,32 @@ export async function syncReminders(
   _settings?: Settings,
   opts: SyncOptions = {},
 ): Promise<ReminderSyncResult> {
-  const config = opts.config === undefined ? configFromEnv() : opts.config
-  const support = getPushSupport(window, config)
+  const support = getPushSupport(window, opts.config === undefined ? configFromEnv() : opts.config)
   if (!support.ok) return { mode: 'calendar-only', reason: support.reason }
+  const config = opts.config ?? (await loadConfig())
+  if (!config) return { mode: 'calendar-only', reason: 'needs-connect-code' }
   const plan = buildReminderPlan(habit, {
     timeZone: deviceTimeZone(),
     today: localTodayISO(),
     weeklyReviewTime: opts.weeklyReviewTime,
   })
   if (!plan) {
-    await disableReminders(config!)
+    await disableReminders(config)
     return { mode: 'calendar-only', reason: 'no-active-habit' }
   }
   const permission = await requestNotificationPermission()
   if (permission !== 'granted') return { mode: 'calendar-only', reason: 'permission-denied', plan }
-  const sub = await ensureSubscription(config!)
-  await putSubscription(config!, sub.toJSON(), plan)
-  await setSyncState({ config: config!, plan })
+  const sub = await ensureSubscription(config)
+  await putSubscription(config, sub.toJSON(), plan)
+  await setSyncState({ config, plan })
   return { mode: 'push', plan }
 }
 
 /** 인터페이스 v1 이름. 웹에는 로컬 예약이 없어서 실제로는 서버 푸시 등록이다 */
 export const scheduleLocalReminders = syncReminders
 
-export async function disableReminders(config = configFromEnv()): Promise<void> {
+export async function disableReminders(config?: PushServerConfig | null): Promise<void> {
+  config ??= await loadConfig()
   const reg = await navigator.serviceWorker?.getRegistration()
   const sub = await reg?.pushManager.getSubscription()
   if (sub && config) await deleteSubscription(config, sub.endpoint).catch(() => undefined)
@@ -129,7 +151,8 @@ export async function disableReminders(config = configFromEnv()): Promise<void> 
   await setSyncState(null)
 }
 
-export async function sendTestReminder(config = configFromEnv()): Promise<boolean> {
+export async function sendTestReminder(config?: PushServerConfig | null): Promise<boolean> {
+  config ??= await loadConfig()
   const state = await getSyncState()
   const reg = await navigator.serviceWorker?.getRegistration()
   const sub = await reg?.pushManager.getSubscription()

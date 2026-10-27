@@ -22,5 +22,5 @@ VAPID_PUBLIC_KEY = "REPLACE"
 
 # 시크릿 (wrangler secret put 으로 넣는다, 이 파일에 쓰지 않는다)
 # VAPID_PRIVATE_KEY  node scripts/vapid.mjs 로 만든 개인키 (base64url)
-# API_TOKEN          앱이 서버에 쓸 때 쓰는 토큰 (앱 VITE_PUSH_API_TOKEN 과 같은 값)
+# API_TOKEN          연결 코드. 앱 설정 화면에서 기기마다 한 번 입력한다 (번들에 넣지 않음)
 # CAL_TOKEN          캘린더 구독 주소에 들어가는 비밀 문자열

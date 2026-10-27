@@ -8,6 +8,7 @@ Cloudflare Workers **무료 플랜** 안에서 동작한다: 매 분 cron(무료
 
 | 경로 | 설명 |
 |---|---|
+| `GET /api/ping` | 연결 코드 확인 (Bearer API_TOKEN) |
 | `PUT /api/subscription` | `{subscription, plan, replacesEndpoint?}` 구독과 알림 일정 등록 (Bearer API_TOKEN) |
 | `DELETE /api/subscription` | `{endpoint}` 해지 |
 | `POST /api/test` | `{endpoint}` 테스트 알림 |
@@ -34,11 +35,12 @@ npm run vapid                               # VAPID 키 한 쌍 출력
    npx wrangler secret put CAL_TOKEN           # 다른 긴 랜덤 문자열
    ```
 3. `npm run deploy` → `https://habit-quest-push.<계정>.workers.dev` 주소가 나온다
-4. 앱 루트 `.env.local`에 `VITE_PUSH_SERVER_URL`, `VITE_PUSH_API_TOKEN`, `VITE_VAPID_PUBLIC_KEY` 넣고 앱 다시 빌드·배포
+4. GitHub 저장소 Settings → Secrets and variables → Actions → **Variables**에 `VITE_PUSH_SERVER_URL`(위 주소), `VITE_VAPID_PUBLIC_KEY`(공개키) 넣고 다시 배포 (로컬 빌드면 `.env.local`)
+5. 휴대폰에서 앱 설정 → 알림 카드에 **연결 코드**(API_TOKEN 값)를 한 번 입력 → 정시 알림 켜기 → 테스트 알림
 
 ## 알아둘 점
 
-- `API_TOKEN`은 앱 번들 안에 들어간다. 앱이 공개 주소에 있으면 누군가 읽어서 구독을 추가하거나 구독 캘린더를 덮어쓸 수 있다. 개인용이라 위험은 작지만, 걱정되면 토큰을 바꾸고(`wrangler secret put API_TOKEN`) 앱을 다시 배포하면 된다.
+- `API_TOKEN`(연결 코드)은 앱 번들에 넣지 않는다. 기기마다 한 번 입력해 그 기기에만 저장된다. 코드가 새면 `wrangler secret put API_TOKEN`으로 바꾸고 기기에서 다시 입력하면 된다.
 - 개인용(기기 1~3대) 기준으로 상태를 KV 키 하나에 둔다. 여러 사람이 쓰려면 구독별 키나 D1로 바꿔야 한다.
 
 ## 테스트

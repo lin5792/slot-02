@@ -41,15 +41,16 @@
 | `idb-read.ts` | 서비스워커에서 본체 DB를 버전 없이 읽기 (DB가 없으면 만들지 않음) |
 | `push-client.ts`, `push-api.ts`, `push-store.ts` | 지원 판단, 권한, 구독, 서버 API, 별도 DB(`habit-quest-notify`)에 서버 설정 보관 |
 
-## 환경변수 (푸시 서버를 쓸 때만, `.env.local`)
+## 환경변수 (푸시 서버를 쓸 때만, 둘 다 공개값)
 
 ```
 VITE_PUSH_SERVER_URL=https://habit-quest-push.<계정>.workers.dev
-VITE_PUSH_API_TOKEN=<worker API_TOKEN과 같은 값>
 VITE_VAPID_PUBLIC_KEY=<worker VAPID_PUBLIC_KEY와 같은 값>
 ```
 
-비어 있으면 캘린더 알람만 쓰는 모드로 동작한다. 서버 배포는 `worker/README.md`.
+GitHub Pages 빌드는 저장소 Variables의 같은 이름 값을 쓴다. 비어 있으면 캘린더 알람만 쓰는 모드로 동작한다.
+
+서버 쓰기 권한(연결 코드 = worker `API_TOKEN`)은 공개 번들에 넣지 않는다. 설정 화면에서 기기마다 한 번 입력하면 서버 `/api/ping`으로 확인한 뒤 그 기기의 `habit-quest-notify` DB에만 저장한다. 서버 배포는 `worker/README.md`.
 
 ## 테스트
 

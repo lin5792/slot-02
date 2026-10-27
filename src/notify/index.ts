@@ -4,7 +4,7 @@ import type { CalendarEvent } from '../domain/types'
 
 import { parseIcsEvents, type ImportOptions } from './ics-read'
 import { fetchIcsViaServer } from './push-api'
-import { configFromEnv } from './push-client'
+import { loadConfig } from './push-client'
 
 export { buildIcs, downloadIcs, type IcsOptions } from './ics-write'
 export { parseIcsEvents, type ImportOptions } from './ics-read'
@@ -16,6 +16,8 @@ export {
   disableReminders,
   sendTestReminder,
   configFromEnv,
+  loadConfig,
+  connectServer,
   type PushSupport,
   type ReminderSyncResult,
   type ReminderSyncReason,
@@ -42,7 +44,7 @@ export async function importIcs(text: string, opts?: ImportOptions): Promise<num
  * 브라우저는 CORS 때문에 직접 못 받으므로 푸시 서버가 있어야 한다. 없으면 파일 가져오기(importIcs)를 쓴다.
  */
 export async function importIcsFromUrl(calendarUrl: string, opts?: ImportOptions): Promise<number> {
-  const config = configFromEnv()
-  if (!config) throw new Error('푸시 서버가 설정되지 않아 주소로 가져올 수 없습니다. .ics 파일로 가져오세요.')
+  const config = await loadConfig()
+  if (!config) throw new Error('푸시 서버에 연결되지 않아 주소로 가져올 수 없습니다. .ics 파일로 가져오세요.')
   return importIcs(await fetchIcsViaServer(config, calendarUrl), opts)
 }

@@ -172,6 +172,12 @@ describe('worker', () => {
     expect(pushes[0].url).toBe('https://calendar.google.com/calendar/ical/a/private-b/basic.ics')
   })
 
+  it('연결 코드 확인', async () => {
+    const env = await makeEnv()
+    expect((await api(env, 'GET', '/api/ping')).status).toBe(200)
+    expect((await api(env, 'GET', '/api/ping', undefined, 'nope')).status).toBe(401)
+  })
+
   it('CORS preflight', async () => {
     const env = await makeEnv()
     const res = await handleFetch(new Request('https://push.worker/api/subscription', { method: 'OPTIONS' }), env)

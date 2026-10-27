@@ -1,6 +1,7 @@
 // 습관 퀘스트 푸시 서버.
 // - 매 분 cron: 구독마다 dueReminders()로 보낼 알림을 골라 웹 푸시로 보낸다
 // - PUT/DELETE /api/subscription: 앱이 구독과 알림 일정(ReminderPlan)을 등록·해지
+// - GET /api/ping: 연결 코드 확인
 // - POST /api/test: 테스트 알림
 // - PUT /api/calendar, GET /cal/<CAL_TOKEN>.ics: 캘린더 구독 주소(구글·애플 캘린더에서 URL로 구독)
 // - POST /api/ics-proxy: 구글·iCloud·Outlook의 비공개 iCal 주소를 대신 받아온다 (브라우저는 CORS로 직접 못 받음)
@@ -74,6 +75,8 @@ export async function handleFetch(req: Request, env: Env): Promise<Response> {
 
   if (!url.pathname.startsWith('/api/')) return new Response('not found', { status: 404 })
   if (!authorized(req, env)) return json(env, { error: 'unauthorized' }, 401)
+
+  if (url.pathname === '/api/ping' && req.method === 'GET') return json(env, { ok: true })
 
   if (url.pathname === '/api/subscription' && req.method === 'PUT') {
     const body = (await req.json()) as { subscription?: StoredSubscription['subscription']; plan?: unknown; replacesEndpoint?: string }

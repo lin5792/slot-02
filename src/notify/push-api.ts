@@ -5,7 +5,7 @@ import type { ReminderPlan } from './schedule'
 export interface PushServerConfig {
   /** 예: https://habit-quest-push.<계정>.workers.dev */
   serverUrl: string
-  /** 서버 API_TOKEN 시크릿과 같은 값 */
+  /** 연결 코드 = 서버 API_TOKEN. 공개 번들에 넣지 않고 사용자가 기기마다 한 번 입력해 로컬에만 둔다 */
   apiToken: string
   /** VAPID 공개키 (base64url) */
   vapidPublicKey: string
@@ -18,6 +18,11 @@ async function call(config: PushServerConfig, path: string, init: RequestInit): 
   })
   if (!res.ok) throw new Error(`푸시 서버 ${path} 실패: ${res.status} ${await res.text().catch(() => '')}`)
   return res
+}
+
+/** 연결 코드가 맞는지 확인 */
+export async function pingServer(config: PushServerConfig): Promise<void> {
+  await call(config, '/api/ping', { method: 'GET' })
 }
 
 export async function putSubscription(

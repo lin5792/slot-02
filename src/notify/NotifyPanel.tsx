@@ -8,7 +8,8 @@ import { upsertEventsFromIcs } from '../db/queries'
 import { buildIcs, downloadIcs } from './ics-write'
 import { parseIcsEvents } from './ics-read'
 import { fetchIcsViaServer, publishCalendar } from './push-api'
-import { configFromEnv, disableReminders, getPushSupport, sendTestReminder, syncReminders, type ReminderSyncReason } from './push-client'
+import { configFromEnv, connectServer, disableReminders, getPushSupport, loadConfig, sendTestReminder, syncReminders, type ReminderSyncReason } from './push-client'
+import type { PushServerConfig } from './push-api'
 import { getSyncState } from './push-store'
 
 const REASON_TEXT: Record<ReminderSyncReason, string> = {
@@ -18,6 +19,7 @@ const REASON_TEXT: Record<ReminderSyncReason, string> = {
   'no-service-worker': '이 브라우저는 서비스워커를 지원하지 않는다. 캘린더 알람을 쓰자.',
   'permission-denied': '알림 권한이 꺼져 있다. 기기 설정에서 이 앱의 알림을 허용해야 한다.',
   'no-active-habit': '승격 중인 습관이 없어서 보낼 알림이 없다.',
+  'needs-connect-code': '이 기기를 푸시 서버에 연결해야 한다. 서버를 배포할 때 정한 연결 코드(API_TOKEN)를 한 번 입력하자.',
 }
 
 const CAL_URL_KEY = 'habit-quest:calendar-url'
@@ -38,8 +40,10 @@ const writeCalUrl = (v: string) => {
 
 export function NotifyPanel({ habit, blocks, settings }: { habit: Habit | undefined; blocks: Block[]; settings: Settings }) {
   const toast = useToast()
-  const config = useMemo(() => configFromEnv(), [])
-  const support = useMemo(() => getPushSupport(window, config), [config])
+  const server = useMemo(() => configFromEnv(), [])
+  const support = useMemo(() => getPushSupport(window, server), [server])
+  const [config, setConfig] = useState<PushServerConfig | null>(null)
+  const [code, setCode] = useState('')
   const [pushOn, setPushOn] = useState(false)
   const [reason, setReason] = useState<ReminderSyncReason | null>(support.ok ? null : support.reason)
   const [calUrl, setCalUrl] = useState<string | null>(readCalUrl)
@@ -48,7 +52,8 @@ export function NotifyPanel({ habit, blocks, settings }: { habit: Habit | undefi
 
   useEffect(() => {
     getSyncState().then((s) => setPushOn(!!s), () => setPushOn(false))
-  }, [])
+    loadConfig(server).then(setConfig, () => setConfig(null))
+  }, [server])
 
   // 습관·백스톱·블록이 바뀌면 이미 켜 둔 푸시 일정과 구독 캘린더를 조용히 갱신한다
   const habitKey = habit && [habit.id, habit.status, habit.startDate, habit.anchorTime, habit.backstopTime, habit.extensions, habit.tiers.min].join('|')
@@ -77,9 +82,24 @@ export function NotifyPanel({ habit, blocks, settings }: { habit: Habit | undefi
       <p className="small">
         정시 알림: <b>{pushOn ? '푸시 켜짐 (기록을 보고 문구가 바뀐다)' : '캘린더 알람'}</b>
       </p>
-      {reason && !pushOn && <p className="small muted">{REASON_TEXT[reason]}</p>}
+      {(() => {
+        const shown = reason ?? (server && !config ? 'needs-connect-code' : null)
+        return shown && !pushOn && <p className="small muted">{REASON_TEXT[shown]}</p>
+      })()}
 
-      {support.ok && (
+      {server && !config && (
+        <div className="row">
+          <input className="input grow" type="password" autoComplete="off" placeholder="푸시 서버 연결 코드" value={code} onChange={(e) => setCode(e.target.value)} />
+          <button className="btn sm" disabled={busy || !code} onClick={() => run(async () => {
+            setConfig(await connectServer(code, server))
+            setCode('')
+            setReason(support.ok ? null : support.reason)
+            toast('이 기기를 푸시 서버에 연결했다')
+          })}>연결</button>
+        </div>
+      )}
+
+      {support.ok && config && (
         <div className="row wrap">
           {!pushOn ? (
             <button className="btn sm primary" disabled={busy || !habit} onClick={() => run(async () => {

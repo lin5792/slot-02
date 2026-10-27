@@ -41,5 +41,5 @@
 - 설정 화면 알림 카드는 `src/notify/NotifyPanel.tsx`(`<NotifyPanel habit blocks settings />`)가 그린다. Setup.tsx는 이걸 넣기만 한다.
 - 서비스워커: `registerPushHandlers(self)` 그대로. 아이콘은 `pwa-192.png`, 링크는 SW scope 기준 상대 경로라 `BASE_PATH` 하위 경로 배포에서도 맞다.
 - 서비스워커는 본체 DB를 읽기만 한다. 알림 모듈의 자체 저장소는 별도 DB `habit-quest-notify`.
-- 푸시 서버는 `worker/`(별도 패키지, 루트 vitest에서 제외). 앱 환경변수 `VITE_PUSH_SERVER_URL`, `VITE_PUSH_API_TOKEN`, `VITE_VAPID_PUBLIC_KEY`가 비면 캘린더 알람만 쓰는 모드.
+- 푸시 서버는 `worker/`(별도 패키지, 루트 vitest에서 제외). 앱 환경변수는 공개값 `VITE_PUSH_SERVER_URL`, `VITE_VAPID_PUBLIC_KEY` 둘뿐이고, 비면 캘린더 알람만 쓰는 모드. 서버 쓰기 토큰은 번들에 없고 사용자가 설정 화면에서 기기마다 연결 코드로 입력한다.
 - 날짜 경계: 04:00 전 알림은 전날 퀘스트로 센다 (`src/notify/dates.ts` `DAY_BOUNDARY`). 본체 "오늘" 판정과 다르면 알려 주기.

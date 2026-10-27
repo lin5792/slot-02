@@ -34,6 +34,15 @@ async function tx<T>(factory: IDBFactory, mode: IDBTransactionMode, fn: (s: IDBO
   }
 }
 
+/** 연결 코드(서버 API_TOKEN). 이 기기의 로컬 DB에만 둔다 */
+export function getConnectCode(factory: IDBFactory = indexedDB): Promise<string | undefined> {
+  return tx(factory, 'readonly', (s) => s.get('connect-code') as IDBRequest<string | undefined>)
+}
+
+export async function setConnectCode(code: string | null, factory: IDBFactory = indexedDB): Promise<void> {
+  await tx<unknown>(factory, 'readwrite', (s) => (code ? s.put(code, 'connect-code') : s.delete('connect-code')) as IDBRequest<unknown>)
+}
+
 export function getSyncState(factory: IDBFactory = indexedDB): Promise<SyncState | undefined> {
   return tx(factory, 'readonly', (s) => s.get('sync') as IDBRequest<SyncState | undefined>)
 }
