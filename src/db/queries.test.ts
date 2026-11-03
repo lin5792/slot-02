@@ -1,9 +1,12 @@
+import Dexie from 'dexie'
 import { beforeEach, describe, expect, it } from 'vitest'
-import { db } from './db'
+import { db, HabitDB } from './db'
 import {
   createHabit, getActiveHabit, getLog, logTier, promoteHabit, redrawCard, submitSrbai,
-  todayCardId, upsertEventsFromIcs, exportAll, importAll,
+  todayCardId, upsertEventsFromIcs, exportAll, importAll, buyReward, setAfterglow, getSettings,
+  toggleQuestDone, saveReward, saveSkillAttempt,
 } from './queries'
+import { STORES } from './schema'
 import type { CalendarEvent } from '../domain/types'
 
 const draft = {
@@ -76,5 +79,49 @@ describe('queries', () => {
     await db.logs.clear()
     await importAll(json)
     expect((await getLog(h.id, '2026-11-02'))?.tier).toBe('best')
+  })
+
+  it('잔액이 모자라면 살 수 없다', async () => {
+    await saveReward({ title: '커피', price: 40, kind: 'now' })
+    const r = (await db.rewards.toArray())[0]
+    expect(await buyReward(r, 39, '2026-11-02')).toBe(false)
+    expect(await buyReward(r, 40, '2026-11-02')).toBe(true)
+    expect(await db.purchases.count()).toBe(1)
+  })
+
+  it('앵콜/참고 저장은 하루 한 번만 고른다', async () => {
+    expect(await setAfterglow('2026-11-02', 'encore')).toBe(true)
+    expect(await setAfterglow('2026-11-02', 'rest')).toBe(false)
+    expect((await getSettings()).afterglow).toEqual({ '2026-11-02': 'encore' })
+  })
+
+  it('사이드 퀘스트는 누를 때마다 켜고 끈다', async () => {
+    await toggleQuestDone('q1', '2026-11-02')
+    expect((await getLog('q1', '2026-11-02'))?.tier).toBe('basic')
+    await toggleQuestDone('q1', '2026-11-02')
+    expect(await getLog('q1', '2026-11-02')).toBeUndefined()
+  })
+
+  it('백업에 상점·시험 기록도 들어간다', async () => {
+    await saveSkillAttempt('pushup1', '2026-11-02', 8)
+    const json = await exportAll()
+    await db.skillTests.clear()
+    await importAll(json)
+    expect((await db.skillTests.toArray())[0].value).toBe(8)
+  })
+
+  it('v1 DB를 열면 기록을 지킨 채 v2로 올라간다', async () => {
+    db.close()
+    await Dexie.delete('upgrade-test')
+    const v1 = new Dexie('upgrade-test')
+    v1.version(1).stores(STORES)
+    await v1.table('logs').put({ habitId: 'h', date: '2026-11-02', tier: 'best', loggedAt: 0 })
+    v1.close()
+    const v2 = new HabitDB('upgrade-test')
+    expect((await v2.logs.get(['h', '2026-11-02']))?.tier).toBe('best')
+    expect(await v2.rewards.count()).toBe(0)
+    expect(v2.verno).toBe(2)
+    v2.close()
+    await db.open()
   })
 })

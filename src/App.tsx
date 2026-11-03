@@ -3,28 +3,41 @@ import { useRegisterSW } from 'virtual:pwa-register/react'
 import { useAppData } from './hooks'
 import { DayLayers } from './screens/DayLayers'
 import { Journey } from './screens/Journey'
+import { Quests } from './screens/Quests'
 import { Onboarding, Setup } from './screens/Setup'
-import { Today } from './screens/Today'
+import { Shop } from './screens/Shop'
+import { Skills } from './screens/Skills'
 import { Weekly } from './screens/Weekly'
 import { Icon } from './ui/common'
 
 const TABS = [
-  { id: 'today', label: '오늘', icon: Icon.today },
-  { id: 'layers', label: '하루', icon: Icon.layers },
-  { id: 'journey', label: '66일', icon: Icon.journey },
-  { id: 'weekly', label: '주간', icon: Icon.weekly },
-  { id: 'setup', label: '설정', icon: Icon.setup },
+  { id: 'quest', label: '퀘스트', icon: Icon.today },
+  { id: 'shop', label: '상점', icon: Icon.shop },
+  { id: 'skills', label: '스킬', icon: Icon.skills },
+  { id: 'more', label: '설정', icon: Icon.setup },
 ] as const
 type TabId = (typeof TABS)[number]['id']
 
-const initialTab = (): TabId => {
+const MORE = [
+  { id: 'setup', label: '습관' },
+  { id: 'layers', label: '하루' },
+  { id: 'journey', label: '66일' },
+  { id: 'weekly', label: '주간' },
+] as const
+type MoreId = (typeof MORE)[number]['id']
+
+// 예전 주소(#today, #layers …)로 들어와도 맞는 화면을 연다
+const initial = (): { tab: TabId; more: MoreId } => {
   const h = location.hash.slice(1)
-  return TABS.some(t => t.id === h) ? (h as TabId) : 'today'
+  if (TABS.some(t => t.id === h)) return { tab: h as TabId, more: 'setup' }
+  if (MORE.some(m => m.id === h)) return { tab: 'more', more: h as MoreId }
+  return { tab: 'quest', more: 'setup' }
 }
 
 export default function App() {
   const data = useAppData()
-  const [tab, setTabState] = useState<TabId>(initialTab)
+  const [tab, setTabState] = useState<TabId>(() => initial().tab)
+  const [more, setMore] = useState<MoreId>(() => initial().more)
   const setTab = (t: string) => {
     setTabState(t as TabId)
     history.replaceState(null, '', `#${t}`)
@@ -44,11 +57,23 @@ export default function App() {
             <button className="btn sm primary" onClick={() => updateServiceWorker(true)}>업데이트</button>
           </div>
         )}
-        {tab === 'today' && <Today data={data} goTo={setTab} />}
-        {tab === 'layers' && <DayLayers data={data} />}
-        {tab === 'journey' && <Journey data={data} />}
-        {tab === 'weekly' && <Weekly data={data} />}
-        {tab === 'setup' && <Setup data={data} />}
+        {tab === 'quest' && <Quests data={data} goTo={setTab} />}
+        {tab === 'shop' && <Shop data={data} />}
+        {tab === 'skills' && <Skills data={data} />}
+        {tab === 'more' && (
+          <div className="stack">
+            <div className="seg" role="tablist">
+              {MORE.map(m => (
+                <button key={m.id} role="tab" aria-selected={more === m.id} className={more === m.id ? 'on' : ''}
+                  onClick={() => { setMore(m.id); history.replaceState(null, '', `#${m.id}`) }}>{m.label}</button>
+              ))}
+            </div>
+            {more === 'setup' && <Setup data={data} />}
+            {more === 'layers' && <DayLayers data={data} />}
+            {more === 'journey' && <Journey data={data} />}
+            {more === 'weekly' && <Weekly data={data} />}
+          </div>
+        )}
       </main>
       <div className="tabs">
         <nav>

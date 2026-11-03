@@ -3,7 +3,7 @@
 
 export const DB_NAME = 'habit-quest'
 /** Dexie 버전. 원시 IndexedDB 버전은 이 값 × 10 이다 (Dexie 규칙). */
-export const DB_SCHEMA_VERSION = 1
+export const DB_SCHEMA_VERSION = 2
 
 export const STORES = {
   habits: 'id, status',
@@ -15,4 +15,13 @@ export const STORES = {
   reviews: 'id, habitId, weekStart',
   srbai: 'id, habitId',
   settings: 'key',
+} as const
+
+/** v2: 퀘스트 보상(골드 → 내 상점)과 승급 시험. 기존 스토어는 그대로다 */
+export const STORES_V2 = {
+  ...STORES,
+  quests: 'id',
+  rewards: 'id',
+  purchases: 'id, date',
+  skillTests: 'id, skillId',
 } as const
