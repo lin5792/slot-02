@@ -3,7 +3,8 @@ import { drawCard, REDRAWS_PER_DAY } from '../domain/deck'
 import { SRBAI_PASS_MEAN } from '../domain/rules'
 import { fromMin, toMin } from '../domain/time'
 import type {
-  Block, CalendarEvent, DayLog, Habit, ISODate, Measurement, Settings, SrbaiCheck, Tier, WeeklyReview,
+  Afterglow, Block, CalendarEvent, DayLog, DayType, Habit, ISODate, Measurement, Reward, Settings,
+  SideQuest, SkillAttempt, SrbaiCheck, Tier, WeeklyReview,
 } from '../domain/types'
 
 export const uid = () => crypto.randomUUID()
@@ -138,9 +139,70 @@ export async function submitSrbai(habit: Habit, date: ISODate, answers: SrbaiChe
   return check
 }
 
+// ---- 평일/휴일 · 한 판 더 ----
+
+/** 오늘만 평일/휴일을 바꾼다. 요일 기본값과 같으면 지운다 */
+export async function setDayOverride(date: ISODate, type: DayType | null) {
+  const s = await getSettings()
+  const next = { ...s.dayOverride }
+  if (type) next[date] = type
+  else delete next[date]
+  await saveSettings({ dayOverride: next })
+}
+
+/** 클리어 뒤 고른 것. 하루 한 번만 정한다 */
+export async function setAfterglow(date: ISODate, choice: Afterglow): Promise<boolean> {
+  const s = await getSettings()
+  if (s.afterglow?.[date]) return false
+  await saveSettings({ afterglow: { ...s.afterglow, [date]: choice } })
+  return true
+}
+
+// ---- 사이드 퀘스트 (기록은 logs에 tier='basic'으로) ----
+
+export async function saveQuest(q: Omit<SideQuest, 'id' | 'createdAt'> & { id?: string; createdAt?: number }) {
+  await db.quests.put({ ...q, id: q.id ?? uid(), createdAt: q.createdAt ?? Date.now() })
+}
+
+/** 지난 기록의 골드를 지키려고 지우지 않고 숨긴다 */
+export const archiveQuest = (id: string) => db.quests.update(id, { archived: true })
+
+export async function toggleQuestDone(questId: string, date: ISODate) {
+  if (await getLog(questId, date)) await clearLog(questId, date)
+  else await logTier(questId, date, 'basic')
+}
+
+// ---- 내 상점 ----
+
+export async function saveReward(r: Omit<Reward, 'id' | 'createdAt'> & { id?: string; createdAt?: number }) {
+  await db.rewards.put({ ...r, id: r.id ?? uid(), createdAt: r.createdAt ?? Date.now() })
+}
+
+export const deleteReward = (id: string) => db.rewards.delete(id)
+
+/** 잔액이 모자라면 false. 잔액은 기록에서 계산한 값을 받는다 */
+export async function buyReward(reward: Reward, balance: number, date: ISODate): Promise<boolean> {
+  if (balance < reward.price) return false
+  await db.purchases.add({ id: uid(), rewardId: reward.id, title: reward.title, price: reward.price, date, createdAt: Date.now() })
+  return true
+}
+
+export const markTicketUsed = (purchaseId: string) => db.purchases.update(purchaseId, { used: true })
+
+// ---- 승급 시험 ----
+
+export async function saveSkillAttempt(skillId: string, date: ISODate, value: number): Promise<SkillAttempt> {
+  const a: SkillAttempt = { id: uid(), skillId, date, value, createdAt: Date.now() }
+  await db.skillTests.add(a)
+  return a
+}
+
 // ---- 백업 (로컬 전용 앱이라 내보내기·가져오기가 유일한 백업) ----
 
-const TABLES = ['habits', 'blocks', 'events', 'logs', 'measurements', 'reviews', 'srbai', 'settings'] as const
+const TABLES = [
+  'habits', 'blocks', 'events', 'logs', 'measurements', 'reviews', 'srbai', 'settings',
+  'quests', 'rewards', 'purchases', 'skillTests',
+] as const
 
 export async function exportAll(): Promise<string> {
   const out: Record<string, unknown[]> = {}

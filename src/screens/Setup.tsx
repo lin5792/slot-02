@@ -5,8 +5,9 @@ import type { Habit, IfThen, Weekday } from '../domain/types'
 import {
   backstopFor, createHabit, exportAll, importAll, promoteHabit, saveBlock, saveSettings, updateHabit,
 } from '../db/queries'
+import { DEFAULT_WORKDAYS } from '../domain/economy'
 import { NotifyPanel } from '../notify/NotifyPanel'
-import { useToast } from '../ui/common'
+import { useToast, WeekdayPicker } from '../ui/common'
 
 type HabitDraft = Omit<Habit, 'id' | 'createdAt' | 'status' | 'extensions'>
 
@@ -168,6 +169,12 @@ export function Setup({ data }: { data: AppData }) {
             </button>
           )}
         </div>
+      </section>
+
+      <section className="card stack">
+        <h3>근무하는 요일</h3>
+        <p className="small muted">나머지 요일은 휴일이다. 오늘만 다르면 퀘스트 화면에서 바꾼다.</p>
+        <WeekdayPicker value={settings.workdays ?? (DEFAULT_WORKDAYS as Weekday[])} onChange={v => saveSettings({ workdays: v })} />
       </section>
 
       <NotifyPanel habit={habit} blocks={data.blocks} settings={settings} />

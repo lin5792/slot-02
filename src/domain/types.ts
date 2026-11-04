@@ -136,4 +136,65 @@ export interface Settings {
   redraws: Record<ISODate, number>
   /** 오늘 뽑은 카드 고정: date → cardId */
   drawn: Record<ISODate, string>
+  /** 근무하는 요일. 없으면 월~금 */
+  workdays?: Weekday[]
+  /** 요일과 다르게 정한 날 (예: 공휴일은 휴일) */
+  dayOverride?: Record<ISODate, DayType>
+  /** 메인 퀘스트를 깬 뒤 고른 것: 앵콜 한 판 또는 참고 저장 */
+  afterglow?: Record<ISODate, Afterglow>
+  /** 한 달 보상 예산(원). 1 G가 얼마쯤인지 보여 주는 데만 쓴다 */
+  rewardBudget?: number
+  /** 퀘스트할 때만 즐기는 것 (유혹 묶기) */
+  bundle?: string
+}
+
+export type DayType = 'work' | 'off'
+export type Afterglow = 'encore' | 'rest'
+
+/**
+ * 메인 습관 말고 매일 깨는 작은 퀘스트. 기록은 logs에 habitId = 이 id, tier = 'basic'으로 남는다.
+ */
+export interface SideQuest {
+  id: string
+  title: string
+  minutes: number
+  gold: number
+  /** 어느 날에 나오는가 */
+  on: DayType | 'both'
+  /** 보통 하는 시각 (24시간 링에 점으로 찍힌다, 선택) */
+  time?: HHmm
+  /** 지운 퀘스트. 지난 기록의 골드를 지키려고 숨기기만 한다 */
+  archived?: boolean
+  createdAt: number
+}
+
+/** 상점 물건. 마스터가 직접 정한 실제 보상이다 */
+export interface Reward {
+  id: string
+  title: string
+  price: number
+  /** now = 바로 쓰기, goal = 모아서 사기 */
+  kind: 'now' | 'goal'
+  createdAt: number
+}
+
+/** 골드를 쓴 기록. 사용권은 used가 찍힐 때까지 남아 있다 */
+export interface Purchase {
+  id: string
+  rewardId: string
+  title: string
+  price: number
+  date: ISODate
+  used?: boolean
+  createdAt: number
+}
+
+/** 승급 시험 한 번. 합격 여부는 저장하지 않고 기준과 비교해 매번 계산한다 */
+export interface SkillAttempt {
+  id: string
+  skillId: string
+  date: ISODate
+  /** 개수, 초, 또는 자동성 4문항 평균 */
+  value: number
+  createdAt: number
 }

@@ -60,3 +60,37 @@ export function tierAtLeast(t: Tier | null | undefined, min: Tier): boolean {
   if (!t) return false
   return TIER_ORDER.indexOf(t) >= TIER_ORDER.indexOf(min)
 }
+
+// ---- 골드 (퀘스트 보상). XP와 같은 방식으로 기록에서 매번 계산한다 ----
+
+/** 메인 퀘스트 단계별 골드 */
+export const TIER_GOLD: Record<Tier, number> = { min: 10, basic: 30, best: 50 }
+export const COMEBACK_GOLD = 20
+export const DEFAULT_SIDE_GOLD = 20
+
+/** 앵콜 한 판: 클리어 직후 3분, 하루 1번 */
+export const ENCORE_MIN = 3
+export const ENCORE_GOLD = 10
+/** 참고 저장: 다음 날 메인 퀘스트 골드에 이만큼 더 붙는다 (×1.5) */
+export const REST_BONUS_RATE = 0.5
+
+/** 주간 상자: 월~일 메인 퀘스트 5번. 진척 막대는 2칸 채워진 채로 시작한다 (부여된 진척) */
+export const WEEKLY_CHEST_GOAL = 5
+export const WEEKLY_CHEST_GIFT = 2
+export const WEEKLY_CHEST_GOLD = 100
+
+/** 봉인 상자: 깬 날 받고, 다음에 메인 퀘스트를 깨는 날 열린다 */
+export const SEALED_CHEST_MIN = 20
+export const SEALED_CHEST_MAX = 60
+
+/** 깜짝 상자: 퀘스트를 깰 때 가끔 */
+export const SURPRISE_RATE = 0.2
+export const SURPRISE_GOLD = 30
+
+/** 시험에 떨어져도 개인 기록을 깨면 */
+export const RECORD_GOLD = 30
+/** 떨어지면 이만큼 지나야 다시 본다 */
+export const RETEST_DAYS = 3
+
+/** 앵콜 3분에 하는 것. 날짜로 하나 고른다 */
+export const ENCORE_MOVES = ['버피 10개', '스쿼트 20개', '플랭크 40초', '푸시업 10개', '런지 좌우 10개', '점핑잭 40개'] as const

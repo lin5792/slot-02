@@ -8,6 +8,9 @@
   --accent: #ff7a2f;
   --accent-ink: #ffffff;
   --xp: #7c5cff;
+  --gold: #e0a800;
+  --gold-ink: #5a4100;
+  --gold-text: #a57900;
   --good: #1f9d6b;
   --warn: #c77700;
   --bad: #d64545;
@@ -39,6 +42,9 @@
     --accent: #ff8a3d;
     --accent-ink: #1d1b2e;
     --xp: #9b85ff;
+    --gold: #f2c14e;
+    --gold-ink: #3a2a00;
+    --gold-text: #f2c14e;
     --good: #3cc68e;
     --warn: #f0a63a;
     --bad: #ff6b6b;
@@ -61,6 +67,9 @@
   --accent: #ff8a3d;
   --accent-ink: #1d1b2e;
   --xp: #9b85ff;
+  --gold: #f2c14e;
+  --gold-ink: #3a2a00;
+  --gold-text: #f2c14e;
   --good: #3cc68e;
   --warn: #f0a63a;
   --bad: #ff6b6b;
@@ -279,7 +288,7 @@ textarea.input { min-height: 72px; resize: vertical; }
   border-top: 1px solid var(--line);
   padding-bottom: env(safe-area-inset-bottom);
 }
-.tabs nav { max-width: 560px; margin: 0 auto; display: grid; grid-template-columns: repeat(5, 1fr); }
+.tabs nav { max-width: 560px; margin: 0 auto; display: grid; grid-template-columns: repeat(4, 1fr); }
 .tabs button {
   border: 0; background: transparent; padding: 8px 0 10px; min-height: 58px;
   display: flex; flex-direction: column; align-items: center; gap: 2px;
@@ -305,3 +314,116 @@ table.simple { width: 100%; border-collapse: collapse; font-size: 14px; }
 table.simple th, table.simple td { text-align: left; padding: 6px 4px; border-bottom: 1px solid var(--line); }
 table.simple th { font-size: 12px; color: var(--muted); font-weight: 650; }
 details summary { cursor: pointer; font-weight: 700; }
+
+/* ---- v4: 골드 · 상점 · 스킬 ---- */
+.gold-text { color: var(--gold-text); font-weight: 800; }
+.chip.gold { background: color-mix(in srgb, var(--gold) 22%, var(--surface)); color: var(--text); }
+.coin { width: 18px; height: 18px; flex: none; }
+.gold-pill {
+  display: inline-flex; align-items: center; gap: 6px; border: 0; cursor: pointer;
+  padding: 6px 12px 6px 8px; border-radius: 999px; font-weight: 800; font-variant-numeric: tabular-nums;
+  background: color-mix(in srgb, var(--gold) 20%, var(--surface)); color: var(--text);
+}
+.topbar { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.topbar .lv { display: flex; align-items: center; gap: 10px; flex: 1; max-width: 220px; }
+.topbar .lv .xpbar { flex: 1; height: 8px; }
+.level.sm { width: 40px; height: 40px; border-radius: 12px; font-size: 16px; grid-row: auto; }
+
+.card.day { display: grid; grid-template-columns: 132px 1fr; gap: 14px; align-items: center; }
+.ring { position: relative; width: 132px; aspect-ratio: 1; }
+.ring svg { width: 100%; height: 100%; display: block; }
+.ring-center { position: absolute; inset: 0; display: grid; place-content: center; text-align: center; line-height: 1.15; }
+.ring-center small { font-size: 11px; color: var(--muted); font-weight: 700; }
+.ring-center b { font-size: 15px; font-weight: 850; }
+.legend .swatch { margin-right: 4px; vertical-align: -1px; }
+
+.perks { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 8px; }
+.perk {
+  display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 14px;
+  background: var(--surface); border: 1px solid var(--line); font-size: 13px; font-weight: 700;
+}
+.perk > b { font-size: 18px; font-weight: 900; }
+.perk.blue { box-shadow: inset 0 0 0 2px var(--l3); }
+.perk.blue > b { color: var(--l3); }
+.perk .mask { font-size: 15px; letter-spacing: .5px; }
+.chest { width: 36px; height: 32px; flex: none; }
+
+.tier .reward { display: flex; flex-direction: column; align-items: flex-end; line-height: 1.15; }
+.tier .reward b { font-weight: 850; font-size: 15px; color: var(--text); }
+.tier .reward small { font-size: 11px; font-weight: 700; color: var(--xp); }
+
+.qrow { display: grid; grid-template-columns: 36px 1fr auto; gap: 10px; align-items: center; }
+.qrow .check {
+  width: 36px; height: 36px; border-radius: 11px; border: 2px solid var(--line); background: var(--surface);
+  font-weight: 900; color: var(--gold-ink); cursor: pointer;
+}
+.qrow.done .check { background: var(--gold); border-color: var(--gold); }
+.qrow .qbody { border: 0; background: transparent; text-align: left; padding: 0; cursor: pointer; display: flex; flex-direction: column; }
+.qrow .qbody b { font-weight: 750; }
+.qrow .qbody small { font-size: 12px; color: var(--muted); }
+.qrow.done .qbody b { text-decoration: line-through; color: var(--muted); }
+.qrow .qgold { font-weight: 800; font-size: 14px; font-variant-numeric: tabular-nums; }
+
+.slots { display: grid; gap: 4px; }
+.slots span { height: 10px; border-radius: 5px; background: var(--surface-2); }
+.slots span.gift { background: color-mix(in srgb, var(--gold) 45%, var(--surface-2)); }
+.slots span.on { background: var(--gold); }
+.slots span.next { box-shadow: inset 0 0 0 2px var(--gold); }
+
+.bar { display: block; height: 8px; border-radius: 99px; background: var(--surface-2); overflow: hidden; }
+.bar > i { display: block; height: 100%; border-radius: 99px; background: var(--xp); transition: width .6s cubic-bezier(.2,.8,.2,1); }
+.bar.gold > i, .near:nth-child(3) .bar > i { background: var(--gold); }
+
+.clear { text-align: left; }
+.clear-head { text-align: center; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.clear .big { font-size: 40px; font-weight: 900; color: var(--gold-text); line-height: 1.1; }
+.choice { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.pick {
+  display: flex; flex-direction: column; gap: 2px; align-items: flex-start; text-align: left; cursor: pointer;
+  padding: 14px; border-radius: 16px; border: 0; background: var(--gold); color: var(--gold-ink);
+}
+.pick b { font-size: 18px; font-weight: 900; }
+.pick span { font-weight: 750; font-size: 14px; }
+.pick small { font-size: 12px; font-weight: 700; opacity: .8; }
+.pick.blue { background: var(--l3); color: #fff; }
+.encore { text-align: center; padding: 12px; border-radius: 16px; background: var(--surface-2); }
+.encore .clock { font-size: 40px; font-weight: 900; }
+
+.shop-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+.shop-grid .item {
+  position: relative; display: flex; flex-direction: column; gap: 10px; justify-content: space-between;
+  padding: 14px; border-radius: var(--radius); background: var(--surface); border: 1px solid var(--line); min-height: 110px;
+}
+.item-title { border: 0; background: transparent; padding: 0; text-align: left; font-weight: 750; cursor: pointer; }
+.shop-grid .owned { position: absolute; top: 8px; right: 8px; }
+.budget-row { width: 100%; cursor: pointer; text-align: left; color: inherit; }
+.lock { font-size: 20px; }
+
+.tree { display: flex; flex-direction: column; gap: 6px; }
+.node {
+  display: flex; align-items: center; gap: 12px; padding: 10px 12px; border-radius: 14px; cursor: pointer;
+  border: 1px solid var(--line); background: var(--surface); text-align: left; width: 100%;
+}
+.node b { display: block; font-weight: 750; }
+.node small { display: block; font-size: 12px; color: var(--muted); }
+.node .mark {
+  width: 34px; height: 34px; border-radius: 10px; flex: none; display: grid; place-items: center;
+  background: var(--surface-2); font-weight: 900; font-size: 15px;
+}
+.node.owned .mark { background: var(--gold); color: var(--gold-ink); }
+.node.ready { border-color: var(--gold); box-shadow: inset 0 0 0 1px var(--gold); }
+.node.ready .mark { background: color-mix(in srgb, var(--gold) 25%, var(--surface)); }
+.node.locked { opacity: .7; }
+
+.counter {
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;
+  min-height: 220px; border-radius: 22px; border: 0; cursor: pointer; width: 100%;
+  background: var(--surface-2); font-size: 72px; font-weight: 900; line-height: 1; user-select: none; touch-action: manipulation;
+}
+.counter small { font-size: 13px; font-weight: 700; color: var(--muted); }
+.counter.hit { background: color-mix(in srgb, var(--gold) 30%, var(--surface-2)); }
+.exam-result { text-align: center; align-items: center; }
+.exam-result .big { font-size: 40px; font-weight: 900; }
+.exam-result.pass .big { color: var(--gold-text); }
+.exam-result .btn { align-self: stretch; }
+.perk.col { flex-direction: column; align-items: flex-start; gap: 2px; }
