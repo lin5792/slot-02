@@ -10,7 +10,7 @@ export { EXERCISE_SAFETY } from './presets-exercise'
 export const THEMES: Theme[] = [
   { id: 'exercise', title: '운동', oneLine: '목적만 고르면 세트·횟수·휴식이 정해진다' },
   { id: 'focus', title: '배우기', oneLine: '하루 몇 쪽, 단어 몇 개로 정해서' },
-  { id: 'mind', title: '마음', oneLine: '자기 전 감사 일기 3줄, 또는 명상' },
+  { id: 'mind', title: '마음', oneLine: '감사 일기 3줄, 부모님께 연락' },
   { id: 'sleep', title: '잠', oneLine: '누워서 몸 힘 빼기' },
 ]
 

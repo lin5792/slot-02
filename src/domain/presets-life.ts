@@ -1,4 +1,4 @@
-// 운동 말고 다른 습관 테마의 초보용 프리셋: 배우기(책·영어 단어), 마음(감사 일기·명상), 잠.
+// 운동 말고 다른 습관 테마의 초보용 프리셋: 배우기(책·영어 단어), 마음(감사 일기·가족 연락), 잠.
 // 시간이나 개수가 정해져 세트 타이머로 돌릴 수 있는 습관만 골랐다. 근거는 docs/presets.md.
 import type { Move, Plan, Session, Stage } from './plans'
 
@@ -51,19 +51,20 @@ const GRATITUDE: Session = {
   min: [{ name: '좋았던 일 한 가지', reps: 1, unit: '가지', sec: 60, cue: '한 줄이면 된다' }],
 }
 
-// ---- 마음: 마음챙김 명상 ----
+// ---- 마음: 가족에게 연락하기 (주 3번 전화, 나머지 날은 안부 메시지) ----
 
-const SIT: Move[] = [{ name: '자세 잡기', sec: 30, cue: '등을 펴고 앉아 눈을 감거나 아래를 본다' }]
-const meditation = (n: number, basic: number, best: number): Session => ({
-  id: `meditate-${n}`, title: `마음챙김 ${n}단계`, summary: `호흡 바라보기 ${basic * 5}분`,
-  warmup: SIT,
-  moves: [{ name: '호흡에 주의 두기', sec: 300, cue: '생각이 떠오르면 알아차리고 다시 숨으로 돌아온다' }],
-  roundRestSec: 0, rounds: { basic, best },
-  min: [{ name: '숨 열 번 세기', sec: 60, cue: '내쉴 때마다 하나씩' }],
-})
-const MEDITATE_1 = meditation(1, 1, 2)
-const MEDITATE_2 = meditation(2, 2, 3)
-const MEDITATE_3 = meditation(3, 3, 4)
+const CALL: Session = {
+  id: 'call-family', title: '부모님께 전화', summary: '엄마·아빠에게 5분 통화',
+  moves: [{ name: '통화', sec: 300, cue: '안부 하나, 오늘 있었던 일 하나. 할 말이 없으면 "밥 먹었어?"부터' }],
+  roundRestSec: 0, rounds: { basic: 1, best: 2 },
+  min: [{ name: '안부 메시지 보내기', reps: 1, unit: '통', sec: 60, cue: '전화가 어려운 날은 한 줄이라도' }],
+}
+const MESSAGE: Session = {
+  id: 'message-family', title: '안부 메시지', summary: '사진 한 장이나 한 줄 안부',
+  moves: [{ name: '안부 메시지 보내기', reps: 1, unit: '통', sec: 60, cue: '오늘 먹은 것 사진, 날씨 이야기, 무엇이든' }],
+  roundRestSec: 0, rounds: { basic: 1, best: 2 },
+  min: [{ name: '이모티콘 하나 보내기', sec: 20, cue: '그것도 연락이다' }],
+}
 
 // ---- 잠: 점진적 근육 이완(7부위) + 느린 호흡 ----
 
@@ -92,7 +93,8 @@ const SRC = {
   karpicke2008: { label: 'Karpicke & Roediger 2008 (Science): 단어 쌍을 다시 보기보다 떠올리기 시험을 반복할 때 일주일 뒤 기억이 훨씬 좋았다' },
   cepeda2006: { label: 'Cepeda 외 2006 (Psychol Bull): 몰아서 보다 간격을 두고 복습할 때 오래 기억한다 (메타분석)' },
   seligman2005: { label: 'Seligman 외 2005 (Am Psychol): 매일 밤 좋았던 일 3가지와 이유 적기 1주, 행복감 상승·우울 감소가 6개월까지' },
-  basso2019: { label: 'Basso 외 2019 (Behav Brain Res): 명상 초보, 하루 13분 · 8주로 주의·기억·기분 개선', url: 'https://pubmed.ncbi.nlm.nih.gov/30153464/' },
+  liu2022: { label: 'Liu 외 2022 (J Pers Soc Psychol): 연락한 사람은 상대가 얼마나 반가워할지를 늘 낮춰 본다 (실험 13개)', url: 'https://pubmed.ncbi.nlm.nih.gov/35816566/' },
+  holtLunstad2010: { label: 'Holt-Lunstad 외 2010 (PLoS Med): 사회적 관계가 탄탄한 사람의 생존 가능성 50% 높음 (148개 연구 메타분석)', url: 'https://journals.plos.org/plosmedicine/article?id=10.1371/journal.pmed.1000316' },
   luo2024: { label: 'Luo 외 2024 (Front Psychol): 자기 전 점진적 근육 이완 7부위(힘 5~10초 · 이완 10~15초), 수면 질 개선', url: 'https://www.frontiersin.org/journals/psychology/articles/10.3389/fpsyg.2024.1337318/full' },
   zaccaro2018: { label: 'Zaccaro 외 2018 (Front Hum Neurosci): 분당 6회 안팎의 느린 호흡과 이완 반응 리뷰' },
 }
@@ -131,16 +133,12 @@ export const LIFE_PLANS: Plan[] = [
     sources: [SRC.seligman2005],
   },
   {
-    id: 'meditate', theme: 'mind', title: '마음챙김 명상',
-    promise: '5분에서 15분으로, 8주 넘게 매일',
-    forWho: '집중력·기분을 다스리고 싶은 명상 초보',
-    rhythm: '매일. 5분마다 종이 한 번 울린다',
-    stages: [
-      { fromDay: 1, week: daily(MEDITATE_1) },
-      { fromDay: 23, week: daily(MEDITATE_2) },
-      { fromDay: 45, week: daily(MEDITATE_3) },
-    ],
-    sources: [SRC.basso2019],
+    id: 'call-family', theme: 'mind', title: '부모님께 연락',
+    promise: '주 3번 5분 통화, 나머지 날은 안부 한 줄',
+    forWho: '연락해야지 하면서 미루는 사람',
+    rhythm: '1·3·5일차마다 전화, 나머지 날은 메시지. 부모님 대신 다른 가족이나 친구도 된다',
+    stages: [{ fromDay: 1, week: [CALL, MESSAGE, CALL, MESSAGE, CALL, MESSAGE, MESSAGE] }],
+    sources: [SRC.liu2022, SRC.holtLunstad2010],
   },
   {
     id: 'sleep', theme: 'sleep', title: '잠들기 루틴',

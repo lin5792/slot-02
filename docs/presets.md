@@ -37,15 +37,15 @@
 | 배우기 | 책 읽기 | 하루 7 → 10 → 15쪽 | 문체부 2023 독서실태, Brysbaert 2019 |
 | 배우기 | 영어 단어 | 새 단어 10 → 20개 + 지난 단어 복습 | Karpicke & Roediger 2008, Cepeda 2006 |
 | 마음 | 감사 일기 3줄 | 좋았던 일 3가지와 이유, 3분 | Seligman 2005 |
-| 마음 | 마음챙김 명상 | 5 → 15분 | Basso 2019 |
+| 마음 | 부모님께 연락 | 주 3번 5분 통화, 나머지 날은 안부 한 줄 | Liu 2022, Holt-Lunstad 2010 |
 | 잠 | 잠들기 루틴 | 근육 이완 7부위 × 2 + 느린 호흡, 9분 | Luo 2024, Zaccaro 2018 |
 
-- **2026-11-24 마스터 피드백으로 바꿈:** 공부 집중(포모도로)과 숨 고르기는 뺐다. 포모도로는 고정 휴식이 스스로 쉬기보다 낫다는 근거도 없었다 (Smits 2025, Göksu 2026). 대신 쪽수·개수처럼 손에 잡히는 목표가 있는 영어 단어, 감사 일기를 넣었다.
+- **2026-11-24 마스터 피드백으로 바꿈:** 공부 집중(포모도로), 숨 고르기, 명상은 뺐다. 포모도로는 고정 휴식이 스스로 쉬기보다 낫다는 근거도 없었다 (Smits 2025, Göksu 2026). 대신 쪽수·개수처럼 손에 잡히는 목표가 있는 영어 단어, 감사 일기, 부모님께 연락을 넣었다.
 - **책 읽기는 시간이 아니라 쪽수다.** 성인 10명 중 6명이 1년에 책을 한 권도 안 읽고, 하루 평균 독서시간은 18.5분이다 (2023). 그래서 1챕터는 하루 7쪽(약 15분)으로 시작해 얇은 책 한 권을 22일 안에 끝내게 했다. 66일에 약 700쪽이다.
 - **한 쪽 = 2분**으로 잡았다. 성인 묵독 평균은 분당 238~260단어(영어)인데, 한국어 쪽당 읽기 시간 연구는 찾지 못해서 초보 기준으로 넉넉하게 잡은 추정치다. 다 읽으면 먼저 끝내면 된다.
 - **영어 단어**는 새 단어를 외우고 바로 가리고 떠올리게 했다. 다시 보기보다 떠올리기를 반복한 쪽이 일주일 뒤 기억이 훨씬 좋았고, 몰아서보다 간격을 둔 복습이 오래 간다. 지난 단어는 1·3·7일 뒤에 다시 떠올린다.
 - **감사 일기**는 매일 밤 좋았던 일 3가지와 이유를 1주 적은 실험에서 행복감 상승·우울 감소가 6개월까지 갔다. 한 줄만 적어도 되는 최소 단계를 뒀다.
-- **명상**은 그대로 뒀다. 초보가 하루 13분 · 8주에 효과를 본 연구가 있어 3챕터 기본을 15분으로 했다.
+- **부모님께 연락**은 마스터 요청으로 명상 대신 넣었다. 매일 전화는 부담이라 주 3번 5분 통화, 나머지 날은 사진이나 한 줄 안부로 했다. 연락하는 사람은 상대가 얼마나 반가워할지를 늘 낮춰 보고(실험 13개), 사회적 관계가 탄탄하면 생존 가능성이 50% 높았다(메타분석 148개 연구).
 - **근육 이완**은 Luo 2024의 7부위, 힘 5~10초 · 이완 10~15초를 따라 힘 7초 · 이완 15초로 했다. 사전·사후 비교라 대조군이 없다는 한계가 있다.
 
 ### 추천 책 (`src/domain/books.ts`)
@@ -100,8 +100,9 @@ const { session, seconds, segments } = dayOfPlan(planById('run')!, programDay)
 - Karpicke JD, Roediger HL (2008). The critical importance of retrieval for learning. *Science* 319:966–968.
 - Cepeda NJ 외 (2006). Distributed practice in verbal recall tasks: a review and quantitative synthesis. *Psychol Bull* 132(3):354–380.
 - Seligman MEP 외 (2005). Positive psychology progress: empirical validation of interventions. *Am Psychol* 60(5):410–421.
-- (뺀 플랜의 근거) Smits 2025 [링크](https://www.mdpi.com/2076-328X/15/7/861), Göksu 2026 [링크](https://www.mdpi.com/2076-328X/16/7/1158), Balban 2023 [PMC](https://pmc.ncbi.nlm.nih.gov/articles/PMC9873947)
-- Basso JC 외 (2019). Brief, daily meditation enhances attention, memory, mood, and emotional regulation in non-experienced meditators. *Behav Brain Res* 356:208–220. [PubMed](https://pubmed.ncbi.nlm.nih.gov/30153464/)
+- (뺀 플랜의 근거) Smits 2025 [링크](https://www.mdpi.com/2076-328X/15/7/861), Göksu 2026 [링크](https://www.mdpi.com/2076-328X/16/7/1158), Balban 2023 [PMC](https://pmc.ncbi.nlm.nih.gov/articles/PMC9873947), Basso 2019 [PubMed](https://pubmed.ncbi.nlm.nih.gov/30153464/)
+- Liu PJ, Rim S, Min L, Min KE (2022). The surprise of reaching out: appreciated more than we think. *J Pers Soc Psychol*. [PubMed](https://pubmed.ncbi.nlm.nih.gov/35816566/)
+- Holt-Lunstad J, Smith TB, Layton JB (2010). Social relationships and mortality risk: a meta-analytic review. *PLoS Med* 7(7):e1000316. [링크](https://journals.plos.org/plosmedicine/article?id=10.1371/journal.pmed.1000316)
 - Luo Y 외 (2024). Progressive muscle relaxation alleviates anxiety and improves sleep quality among healthcare practitioners in a mobile cabin hospital. *Front Psychol* 15:1337318. [링크](https://www.frontiersin.org/journals/psychology/articles/10.3389/fpsyg.2024.1337318/full)
 - Zaccaro A 외 (2018). How breath-control can change your life: a systematic review on psycho-physiological correlates of slow breathing. *Front Hum Neurosci* 12:353.
 
