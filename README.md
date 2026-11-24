@@ -25,6 +25,7 @@ npm run preview    # 빌드 결과를 로컬에서 확인 (서비스워커 포�
 | `src/domain/deck.ts` | 기본 퀘스트 카드 덱과 결정적 뽑기 |
 | `src/domain/economy.ts` | 기록 → 골드(상자·앵콜·휴식 보너스), 평일/휴일, 사이드 퀘스트 |
 | `src/domain/skills.ts` | 스킬 트리와 승급 시험 판정 |
+| `src/domain/plans.ts`, `presets*.ts` | 초보용 플랜 프리셋(운동·집중·마음·잠)과 세트 타이머 구간. 근거는 `docs/presets.md` |
 | `src/db/` | Dexie(IndexedDB) 스키마와 쿼리 |
 | `src/screens/` | 퀘스트 · 상점 · 스킬 탭, 설정 탭 안에 습관·하루·66일·주간 |
 | `src/sw.ts` | 서비스워커 (오프라인 캐시 + 알림 모듈의 push 핸들러) |
