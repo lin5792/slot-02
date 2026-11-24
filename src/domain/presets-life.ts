@@ -1,46 +1,57 @@
-// 운동 말고 다른 습관 테마의 초보용 프리셋: 집중·공부, 마음·호흡, 잠.
-// 세트 타이머로 돌릴 수 있는(시간과 쉬는 시간이 있는) 습관만 골랐다. 근거는 docs/presets.md.
+// 운동 말고 다른 습관 테마의 초보용 프리셋: 배우기(책·영어 단어), 마음(감사 일기·명상), 잠.
+// 시간이나 개수가 정해져 세트 타이머로 돌릴 수 있는 습관만 골랐다. 근거는 docs/presets.md.
 import type { Move, Plan, Session, Stage } from './plans'
 
 const daily = (s: Session): Stage['week'] => [s, s, s, s, s, s, s]
 
-// ---- 집중·공부: 포모도로 (짧게 시작해 25분 · 5분으로) ----
+// ---- 배우기: 책 읽기 (하루 쪽수) ----
 
-const focus = (min: number, breakMin: number): Move => ({
-  name: '집중', sec: min * 60, restSec: breakMin * 60, restAs: '쉬기',
-  cue: '한 가지만. 휴대폰은 다른 방에',
-})
-const PICK_TASK: Move[] = [{ name: '할 일 하나 정하기', sec: 60, cue: '이번에 끝낼 것을 한 줄로 적는다' }]
-const pomodoro = (n: number, min: number, breakMin: number, basic: number, best: number): Session => ({
-  id: `focus-${n}`, title: `집중 ${n}단계`, summary: `${min}분 집중 · ${breakMin}분 쉬기 × ${basic}번`,
-  warmup: PICK_TASK, moves: [focus(min, breakMin)], roundRestSec: 0, rounds: { basic, best },
-  min: [{ ...focus(10, 0), restSec: undefined }],
-})
-const FOCUS_1 = pomodoro(1, 15, 5, 2, 3)
-const FOCUS_2 = pomodoro(2, 20, 5, 2, 3)
-const FOCUS_3 = pomodoro(3, 25, 5, 2, 4)
+/** 한 쪽 읽는 데 잡은 시간(초). 초보 기준 넉넉한 추정치다 (docs/presets.md) */
+export const PAGE_SEC = 120
+/** 챕터별 하루 쪽수. 1챕터에 얇은 책 한 권, 2·3챕터에 보통 책 한 권씩 끝내는 속도 */
+export const PAGES_PER_DAY: Record<1 | 2 | 3, number> = { 1: 7, 2: 10, 3: 15 }
 
-const read = (n: number, basic: number, best: number): Session => ({
-  id: `read-${n}`, title: `책 읽기 ${n}단계`, summary: `${basic * 5}분 읽기`,
-  moves: [{ name: '읽기', sec: 300, cue: '종이책이나 전자책. 알림은 끄고' }],
+const readSession = (n: 1 | 2 | 3): Session => {
+  const pages = PAGES_PER_DAY[n]
+  return {
+    id: `read-${n}`, title: `책 읽기 ${n}단계`, summary: `하루 ${pages}쪽`,
+    moves: [{ name: '읽기', reps: pages, unit: '쪽', sec: pages * PAGE_SEC, cue: '알림은 끄고. 다 읽으면 먼저 끝내도 된다' }],
+    roundRestSec: 0, rounds: { basic: 1, best: 2 },
+    min: [{ name: '한 쪽만 읽기', reps: 1, unit: '쪽', sec: PAGE_SEC, cue: '딱 한 쪽' }],
+  }
+}
+const READ = [readSession(1), readSession(2), readSession(3)]
+
+// ---- 배우기: 영어 단어 (간격 복습 + 가리고 떠올리기) ----
+
+const REVIEW: Move = {
+  name: '지난 단어 떠올리기', sec: 180, cue: '1일·3일·7일 전에 외운 단어를 뜻을 가리고 떠올린다. 틀린 것만 다시 보기',
+}
+const vocabSession = (n: number, basic: number, best: number): Session => ({
+  id: `vocab-${n}`, title: `영어 단어 ${n}단계`, summary: `새 단어 ${basic * 5}개 + 지난 단어 복습`,
+  warmup: [REVIEW],
+  moves: [
+    { name: '새 단어 외우기', reps: 5, unit: '개', sec: 150, cue: '단어·뜻·예문 한 줄을 소리 내어 읽기' },
+    { name: '가리고 떠올리기', sec: 60, cue: '방금 외운 5개를 뜻을 가리고 맞혀 본다' },
+  ],
   roundRestSec: 0, rounds: { basic, best },
-  min: [{ name: '한 쪽만 읽기', sec: 120, cue: '딱 한 쪽, 2분' }],
+  min: [{ ...REVIEW, sec: 120 }],
 })
-const READ_1 = read(1, 2, 3)
-const READ_2 = read(2, 3, 4)
-const READ_3 = read(3, 4, 6)
+const VOCAB = [vocabSession(1, 2, 3), vocabSession(2, 3, 4), vocabSession(3, 4, 5)]
 
-// ---- 마음·호흡 ----
+// ---- 마음: 감사 일기 3줄 ----
 
-const SIGH: Move = {
-  name: '주기적 한숨 호흡', sec: 300,
-  cue: '코로 깊게 들이쉬고 한 번 더 짧게 채운 뒤, 입으로 길고 천천히 내쉬기',
+const GRATITUDE: Session = {
+  id: 'three-good-things', title: '감사 일기 3줄', summary: '오늘 좋았던 일 3가지와 그 이유',
+  moves: [{
+    name: '오늘 좋았던 일 적기', reps: 3, unit: '가지', sec: 180,
+    cue: '작은 일도 좋다. 왜 좋았는지 한 줄씩 덧붙인다',
+  }],
+  roundRestSec: 0, rounds: { basic: 1, best: 2 },
+  min: [{ name: '좋았던 일 한 가지', reps: 1, unit: '가지', sec: 60, cue: '한 줄이면 된다' }],
 }
-const SIGHING: Session = {
-  id: 'cyclic-sigh', title: '숨 고르기 5분', summary: '두 번 들이쉬고 길게 내쉬기 5분',
-  moves: [SIGH], roundRestSec: 0, rounds: { basic: 1, best: 2 },
-  min: [{ ...SIGH, sec: 60 }],
-}
+
+// ---- 마음: 마음챙김 명상 ----
 
 const SIT: Move[] = [{ name: '자세 잡기', sec: 30, cue: '등을 펴고 앉아 눈을 감거나 아래를 본다' }]
 const meditation = (n: number, basic: number, best: number): Session => ({
@@ -76,10 +87,11 @@ const PMR: Session = {
 }
 
 const SRC = {
-  smits2025: { label: 'Smits 외 2025 (Behav Sci): 25분 · 5분 포모도로 vs 스스로 쉬기, 생산성·과제 완수 차이 없음', url: 'https://www.mdpi.com/2076-328X/15/7/861' },
-  goksu2026: { label: 'Göksu 외 2026 (Behav Sci): 12분 · 3분 고정 휴식 vs 스스로 쉬기, 이해도 차이 없음·기분은 스스로 쉬기가 나음', url: 'https://www.mdpi.com/2076-328X/16/7/1158' },
-  bavishi2016: { label: 'Bavishi 외 2016 (Soc Sci Med): 책 읽는 사람의 수명이 더 길었다 (관찰 연구)' },
-  balban2023: { label: 'Balban 외 2023 (Cell Rep Med): 하루 5분 · 28일, 주기적 한숨 호흡이 기분 개선·호흡수 감소에서 가장 좋았다', url: 'https://pmc.ncbi.nlm.nih.gov/articles/PMC9873947' },
+  brysbaert2019: { label: 'Brysbaert 2019 (J Mem Lang): 성인 묵독 평균 분당 238단어(비문학)·260단어(소설)' },
+  mcst2023: { label: '문체부 2023 국민 독서실태 조사: 성인 연간 독서율 43.0%, 하루 독서시간 18.5분', url: 'https://www.korea.kr/news/policyNewsView.do?newsId=148928309' },
+  karpicke2008: { label: 'Karpicke & Roediger 2008 (Science): 단어 쌍을 다시 보기보다 떠올리기 시험을 반복할 때 일주일 뒤 기억이 훨씬 좋았다' },
+  cepeda2006: { label: 'Cepeda 외 2006 (Psychol Bull): 몰아서 보다 간격을 두고 복습할 때 오래 기억한다 (메타분석)' },
+  seligman2005: { label: 'Seligman 외 2005 (Am Psychol): 매일 밤 좋았던 일 3가지와 이유 적기 1주, 행복감 상승·우울 감소가 6개월까지' },
   basso2019: { label: 'Basso 외 2019 (Behav Brain Res): 명상 초보, 하루 13분 · 8주로 주의·기억·기분 개선', url: 'https://pubmed.ncbi.nlm.nih.gov/30153464/' },
   luo2024: { label: 'Luo 외 2024 (Front Psychol): 자기 전 점진적 근육 이완 7부위(힘 5~10초 · 이완 10~15초), 수면 질 개선', url: 'https://www.frontiersin.org/journals/psychology/articles/10.3389/fpsyg.2024.1337318/full' },
   zaccaro2018: { label: 'Zaccaro 외 2018 (Front Hum Neurosci): 분당 6회 안팎의 느린 호흡과 이완 반응 리뷰' },
@@ -87,36 +99,36 @@ const SRC = {
 
 export const LIFE_PLANS: Plan[] = [
   {
-    id: 'study', theme: 'focus', title: '공부 집중',
-    promise: '15분 집중으로 시작해 25분 · 5분 포모도로로',
-    forWho: '앉으면 딴짓부터 하는 사람',
-    rhythm: '매일. 흐름을 타면 쉬는 시간을 건너뛰어도 된다 (고정 휴식이 더 낫다는 근거는 없다)',
-    stages: [
-      { fromDay: 1, week: daily(FOCUS_1) },
-      { fromDay: 23, week: daily(FOCUS_2) },
-      { fromDay: 45, week: daily(FOCUS_3) },
-    ],
-    sources: [SRC.smits2025, SRC.goksu2026],
-  },
-  {
     id: 'reading', theme: 'focus', title: '책 읽기',
-    promise: '하루 10분에서 20분으로',
+    promise: '하루 7쪽에서 15쪽으로, 66일에 약 700쪽 (책 2~3권)',
     forWho: '책을 사 두고 못 읽는 사람',
-    rhythm: '매일 같은 때 (자기 전, 출퇴근길 등)',
+    rhythm: '매일 같은 때 (자기 전, 출퇴근길 등). 챕터마다 추천 책 목록(books.ts)에서 한 권',
     stages: [
-      { fromDay: 1, week: daily(READ_1) },
-      { fromDay: 23, week: daily(READ_2) },
-      { fromDay: 45, week: daily(READ_3) },
+      { fromDay: 1, week: daily(READ[0]) },
+      { fromDay: 23, week: daily(READ[1]) },
+      { fromDay: 45, week: daily(READ[2]) },
     ],
-    sources: [SRC.bavishi2016],
+    sources: [SRC.mcst2023, SRC.brysbaert2019],
   },
   {
-    id: 'breathe', theme: 'mind', title: '숨 고르기',
-    promise: '하루 5분 호흡으로 긴장 낮추기',
-    forWho: '스트레스가 많고 명상은 어려운 사람',
-    rhythm: '매일 5분. 긴장되는 때에 한 번 더 해도 좋다',
-    stages: [{ fromDay: 1, week: daily(SIGHING) }],
-    sources: [SRC.balban2023],
+    id: 'vocab', theme: 'focus', title: '영어 단어',
+    promise: '하루 단어 10개에서 20개로, 지난 단어는 간격 두고 다시',
+    forWho: '영어 단어를 외워도 금방 잊는 사람',
+    rhythm: '매일. 외운 날로부터 1일·3일·7일 뒤에 다시 떠올린다',
+    stages: [
+      { fromDay: 1, week: daily(VOCAB[0]) },
+      { fromDay: 23, week: daily(VOCAB[1]) },
+      { fromDay: 45, week: daily(VOCAB[2]) },
+    ],
+    sources: [SRC.karpicke2008, SRC.cepeda2006],
+  },
+  {
+    id: 'gratitude', theme: 'mind', title: '감사 일기 3줄',
+    promise: '자기 전 3분, 오늘 좋았던 일 3가지',
+    forWho: '하루가 늘 별로였다고 느끼는 사람',
+    rhythm: '매일 자기 전',
+    stages: [{ fromDay: 1, week: daily(GRATITUDE) }],
+    sources: [SRC.seligman2005],
   },
   {
     id: 'meditate', theme: 'mind', title: '마음챙김 명상',

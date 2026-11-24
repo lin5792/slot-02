@@ -12,6 +12,8 @@ export interface Move {
   cue?: string
   /** 횟수 운동이면 횟수. 시간 운동(버티기·걷기·집중 등)이면 비운다 */
   reps?: number
+  /** reps의 단위. 기본 '회' (예: 책 '쪽', 단어 '개') */
+  unit?: string
   /**
    * 좌우 각각. 시간 운동이면 왼쪽·오른쪽 두 구간으로 나뉘고 각 구간이 sec초다.
    * 횟수 운동이면 한 구간이고 sec는 양쪽을 합친 예상 시간이다.
@@ -79,6 +81,7 @@ export interface Segment {
   label: string
   sec: number
   reps?: number
+  unit?: string
   each?: boolean
   /** 좌우가 나뉜 시간 운동의 쪽 */
   side?: 'left' | 'right'
@@ -106,6 +109,7 @@ function moveSegments(m: Move, kind: Segment['kind'], extra: Partial<Segment> = 
   const base: Segment = { kind, label: m.name, sec: m.sec, ...extra }
   if (m.cue) base.cue = m.cue
   if (m.reps !== undefined) base.reps = m.reps
+  if (m.unit) base.unit = m.unit
   if (m.each) base.each = true
   if (m.each && m.reps === undefined) {
     return [

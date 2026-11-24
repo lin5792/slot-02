@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { sessionForDay, tierSeconds, timeline, totalSec, uniformTimeline, type Session } from './plans'
+import { BOOKS, booksOfLevel, finishDay, pagesOnDay } from './books'
 import { PLANS, THEMES, dayOfPlan, planById, plansOf } from './presets'
 import { chapterOfDay } from './progress'
 import { PROGRAM_DAYS, chapterRule } from './rules'
@@ -116,5 +117,21 @@ describe('운동 플랜 규칙 (근거 수치)', () => {
       for (const g of t) byName.set(g.label, (byName.get(g.label) ?? 0) + g.sec)
       for (const [name, sec] of byName) expect(sec, name).toBeGreaterThanOrEqual(60)
     }
+  })
+})
+
+describe('책 읽기', () => {
+  it('하루 쪽수는 7 → 10 → 15쪽이고 타이머 구간에 쪽 단위로 들어간다', () => {
+    const p = planById('reading')!
+    expect([1, 23, 45, 70].map(pagesOnDay)).toEqual([7, 10, 15, 15])
+    expect(timeline(sessionForDay(p, 1), 'basic')[0]).toMatchObject({ label: '읽기', reps: 7, unit: '쪽' })
+  })
+
+  it('레벨마다 책이 있고, 1단계 책은 1챕터 안에 다 읽는다', () => {
+    for (const lv of [1, 2, 3] as const) expect(booksOfLevel(lv).length).toBeGreaterThanOrEqual(3)
+    expect(new Set(BOOKS.map(b => b.id)).size).toBe(BOOKS.length)
+    for (const b of booksOfLevel(1).slice(0, 2)) expect(finishDay(b.pages, 1), b.title).toBeLessThanOrEqual(22)
+    expect(finishDay(70, 1)).toBe(10)
+    expect(finishDay(17, 22)).toBe(23) // 22일차 7쪽 + 23일차 10쪽
   })
 })

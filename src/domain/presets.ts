@@ -9,8 +9,8 @@ export { EXERCISE_SAFETY } from './presets-exercise'
 /** 운동이 먼저다. 나머지는 세트 타이머로 돌릴 수 있는 습관만 */
 export const THEMES: Theme[] = [
   { id: 'exercise', title: '운동', oneLine: '목적만 고르면 세트·횟수·휴식이 정해진다' },
-  { id: 'focus', title: '집중·공부', oneLine: '짧은 집중과 쉬기를 번갈아' },
-  { id: 'mind', title: '마음·호흡', oneLine: '하루 5분 호흡, 또는 명상' },
+  { id: 'focus', title: '배우기', oneLine: '하루 몇 쪽, 단어 몇 개로 정해서' },
+  { id: 'mind', title: '마음', oneLine: '자기 전 감사 일기 3줄, 또는 명상' },
   { id: 'sleep', title: '잠', oneLine: '누워서 몸 힘 빼기' },
 ]
 

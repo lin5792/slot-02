@@ -3,7 +3,7 @@
 사용자는 **테마 → 플랜** 두 번만 고른다. 그날 할 세션, 동작, 세트·횟수·시간, 쉬는 시간은 습관의 일차로 정해지고,
 세트 타이머는 `dayOfPlan(plan, day).segments[tier]`를 순서대로 재생하기만 하면 된다.
 
-- 코드: `src/domain/plans.ts`(틀·타이머 구간), `presets-exercise.ts`(운동), `presets-life.ts`(집중·마음·잠), `presets.ts`(목록), 테스트 `presets.test.ts`
+- 코드: `src/domain/plans.ts`(틀·타이머 구간), `presets-exercise.ts`(운동), `presets-life.ts`(배우기·마음·잠), `books.ts`(추천 책), `presets.ts`(목록), 테스트 `presets.test.ts`
 - 66일 = 챕터 22일 × 3. 플랜은 챕터마다 한 단계 어려워진다 (23일차, 45일차). 66일 이후(연장 챕터)는 마지막 단계를 계속 쓴다.
 - 단계: **최소**는 준비·정리 없이 핵심 동작 한 번(운동 5분 이하), **기본**은 그날 세션, **최고**는 한 바퀴 더.
 - 운동 기본 세션은 그날 챕터 상한(20 / 30 / 45분, `rules.ts`) 안에 들어온다. 테스트가 1~66일 전부 확인한다.
@@ -30,20 +30,44 @@
 
 ## 다른 테마
 
-세트 타이머로 돌릴 수 있는 것(시간과 쉬기가 있는 습관)만 골랐다. 물 마시기·일기처럼 시간이 없는 습관은 타이머가 필요 없어서 뺐다.
+시간이나 개수가 정해져 세트 타이머로 돌릴 수 있는 습관만 골랐다. 물 마시기처럼 시간·개수가 없는 습관은 타이머가 필요 없어서 뺐다.
 
 | 테마 | 플랜 | 기본 (1 → 3챕터) | 근거 |
 | --- | --- | --- | --- |
-| 집중·공부 | 공부 집중 (포모도로) | 15분 × 2 → 25분 × 2, 사이 5분 | Smits 2025, Göksu 2026 |
-| 집중·공부 | 책 읽기 | 10 → 20분 | Bavishi 2016 (관찰 연구) |
-| 마음·호흡 | 숨 고르기 | 5분 | Balban 2023 |
-| 마음·호흡 | 마음챙김 명상 | 5 → 15분 | Basso 2019 |
+| 배우기 | 책 읽기 | 하루 7 → 10 → 15쪽 | 문체부 2023 독서실태, Brysbaert 2019 |
+| 배우기 | 영어 단어 | 새 단어 10 → 20개 + 지난 단어 복습 | Karpicke & Roediger 2008, Cepeda 2006 |
+| 마음 | 감사 일기 3줄 | 좋았던 일 3가지와 이유, 3분 | Seligman 2005 |
+| 마음 | 마음챙김 명상 | 5 → 15분 | Basso 2019 |
 | 잠 | 잠들기 루틴 | 근육 이완 7부위 × 2 + 느린 호흡, 9분 | Luo 2024, Zaccaro 2018 |
 
-- **포모도로는 근거가 약하다.** 고정 휴식(25·5분, 12·3분)이 스스로 쉬는 것보다 생산성·이해도가 낫다는 결과는 없었고, 기분·의욕은 스스로 쉬기가 더 나았다. 그래서 타이머는 "시작하게 해 주는 틀"로 쓰고, 흐름을 타면 쉬기를 건너뛰어도 된다고 안내한다.
-- **호흡은 주기적 한숨 호흡**(두 번 들이쉬고 길게 내쉬기). 5분 · 28일 비교에서 마음챙김·박스 호흡보다 기분 개선과 호흡수 감소가 컸다.
-- **명상**은 초보가 하루 13분 · 8주에 효과를 본 연구가 있어, 3챕터 기본을 15분으로 했다.
+- **2026-11-24 마스터 피드백으로 바꿈:** 공부 집중(포모도로)과 숨 고르기는 뺐다. 포모도로는 고정 휴식이 스스로 쉬기보다 낫다는 근거도 없었다 (Smits 2025, Göksu 2026). 대신 쪽수·개수처럼 손에 잡히는 목표가 있는 영어 단어, 감사 일기를 넣었다.
+- **책 읽기는 시간이 아니라 쪽수다.** 성인 10명 중 6명이 1년에 책을 한 권도 안 읽고, 하루 평균 독서시간은 18.5분이다 (2023). 그래서 1챕터는 하루 7쪽(약 15분)으로 시작해 얇은 책 한 권을 22일 안에 끝내게 했다. 66일에 약 700쪽이다.
+- **한 쪽 = 2분**으로 잡았다. 성인 묵독 평균은 분당 238~260단어(영어)인데, 한국어 쪽당 읽기 시간 연구는 찾지 못해서 초보 기준으로 넉넉하게 잡은 추정치다. 다 읽으면 먼저 끝내면 된다.
+- **영어 단어**는 새 단어를 외우고 바로 가리고 떠올리게 했다. 다시 보기보다 떠올리기를 반복한 쪽이 일주일 뒤 기억이 훨씬 좋았고, 몰아서보다 간격을 둔 복습이 오래 간다. 지난 단어는 1·3·7일 뒤에 다시 떠올린다.
+- **감사 일기**는 매일 밤 좋았던 일 3가지와 이유를 1주 적은 실험에서 행복감 상승·우울 감소가 6개월까지 갔다. 한 줄만 적어도 되는 최소 단계를 뒀다.
+- **명상**은 그대로 뒀다. 초보가 하루 13분 · 8주에 효과를 본 연구가 있어 3챕터 기본을 15분으로 했다.
 - **근육 이완**은 Luo 2024의 7부위, 힘 5~10초 · 이완 10~15초를 따라 힘 7초 · 이완 15초로 했다. 사전·사후 비교라 대조군이 없다는 한계가 있다.
+
+### 추천 책 (`src/domain/books.ts`)
+
+책을 거의 안 읽는 성인이 끝까지 읽을 만한 쉽고 짧은 책. 쪽수는 2026-11-24 서점 표기이고 판마다 다르다.
+
+| 단계 | 책 | 쪽수 | 하루 쪽수로 며칠 |
+| --- | --- | --- | --- |
+| 1 (하루 7쪽) | 어린 왕자 (열린책들) | 136 | 20일 |
+| 1 | 긴긴밤 (문학동네) | 144 | 21일 |
+| 1 | 노인과 바다 (민음사) | 193 | 28일 |
+| 1 | 죽고 싶지만 떡볶이는 먹고 싶어 (흔) | 208 | 30일 |
+| 2 (하루 10쪽) | 불편한 편의점 (나무옆의자) | 268 | 27일 |
+| 2 | 달러구트 꿈 백화점 1 (팩토리나인) | 300 | 30일 |
+| 2 | 언어의 온도 (말글터) | 308 | 31일 |
+| 2 | 아몬드 (다즐링 2023, 창비판은 절판) | 314 | 32일 |
+| 3 (하루 15쪽) | 미움받을 용기 (인플루엔셜) | 340 | 23일 |
+| 3 | 우리가 빛의 속도로 갈 수 없다면 (허블) | 344 | 23일 |
+| 3 | 아주 작은 습관의 힘 (비즈니스북스) | 360 | 24일 |
+| 3 | 나미야 잡화점의 기적 (현대문학) | 456 | 31일 |
+
+소년이 온다(216쪽)는 쉽지만 내용이 무거워 첫 책 추천에서는 뺐다.
 
 ## 세트 타이머와의 약속
 
@@ -71,12 +95,14 @@ const { session, seconds, segments } = dayOfPlan(planById('run')!, programDay)
 - Klika B, Jordan C (2013). High-intensity circuit training using body weight. *ACSM's Health & Fitness Journal* 17(3):8–13.
 - Gillen JB 외 (2016). Twelve weeks of sprint interval training improves indices of cardiometabolic health similar to traditional endurance training despite a five-fold lower exercise volume and time commitment. *PLoS One* 11(4):e0154075.
 - Jenkins EM 외 (2019). Do stair climbing exercise "snacks" improve cardiorespiratory fitness? *APNM* 44(6):681–684. [PubMed](https://pubmed.ncbi.nlm.nih.gov/30649897/)
-- Smits EJC, Wenzel N, de Bruin A (2025). Investigating the effectiveness of self-regulated, Pomodoro, and Flowtime break-taking techniques among students. *Behav Sci* 15(7):861. [링크](https://www.mdpi.com/2076-328X/15/7/861)
-- Göksu A, Wiradhany W, de Bruin ABH (2026). When to take a break. *Behav Sci* 16(7):1158. [링크](https://www.mdpi.com/2076-328X/16/7/1158)
-- Bavishi A, Slade MD, Levy BR (2016). A chapter a day: association of book reading with longevity. *Soc Sci Med* 164:44–48.
-- Balban MY 외 (2023). Brief structured respiration practices enhance mood and reduce physiological arousal. *Cell Rep Med* 4(1):100895. [PMC](https://pmc.ncbi.nlm.nih.gov/articles/PMC9873947)
+- 문화체육관광부 (2024). 2023 국민 독서실태 조사 결과. [정책브리핑](https://www.korea.kr/news/policyNewsView.do?newsId=148928309)
+- Brysbaert M (2019). How many words do we read per minute? A review and meta-analysis of reading rate. *J Mem Lang* 109:104047.
+- Karpicke JD, Roediger HL (2008). The critical importance of retrieval for learning. *Science* 319:966–968.
+- Cepeda NJ 외 (2006). Distributed practice in verbal recall tasks: a review and quantitative synthesis. *Psychol Bull* 132(3):354–380.
+- Seligman MEP 외 (2005). Positive psychology progress: empirical validation of interventions. *Am Psychol* 60(5):410–421.
+- (뺀 플랜의 근거) Smits 2025 [링크](https://www.mdpi.com/2076-328X/15/7/861), Göksu 2026 [링크](https://www.mdpi.com/2076-328X/16/7/1158), Balban 2023 [PMC](https://pmc.ncbi.nlm.nih.gov/articles/PMC9873947)
 - Basso JC 외 (2019). Brief, daily meditation enhances attention, memory, mood, and emotional regulation in non-experienced meditators. *Behav Brain Res* 356:208–220. [PubMed](https://pubmed.ncbi.nlm.nih.gov/30153464/)
 - Luo Y 외 (2024). Progressive muscle relaxation alleviates anxiety and improves sleep quality among healthcare practitioners in a mobile cabin hospital. *Front Psychol* 15:1337318. [링크](https://www.frontiersin.org/journals/psychology/articles/10.3389/fpsyg.2024.1337318/full)
 - Zaccaro A 외 (2018). How breath-control can change your life: a systematic review on psycho-physiological correlates of slow breathing. *Front Hum Neurosci* 12:353.
 
-원문을 직접 확인한 것: ACSM 2026 인포그래픽, NHS Couch to 5K, Balban 2023, Luo 2024, Jenkins 2019 초록, Smits 2025, Göksu 2026. 나머지는 널리 인용되는 논문의 서지와 핵심 수치를 기억에서 적었다.
+원문을 직접 확인한 것: ACSM 2026 인포그래픽, NHS Couch to 5K, Balban 2023, Luo 2024, Jenkins 2019 초록, Smits 2025, Göksu 2026, Brysbaert 2019, 문체부 2023 조사, 책 12권의 서점 쪽수. 나머지는 널리 인용되는 논문의 서지와 핵심 수치를 기억에서 적었다.
