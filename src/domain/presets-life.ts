@@ -93,7 +93,7 @@ const SRC = {
   karpicke2008: { label: 'Karpicke & Roediger 2008 (Science): 단어 쌍을 다시 보기보다 떠올리기 시험을 반복할 때 일주일 뒤 기억이 훨씬 좋았다' },
   cepeda2006: { label: 'Cepeda 외 2006 (Psychol Bull): 몰아서 보다 간격을 두고 복습할 때 오래 기억한다 (메타분석)' },
   seligman2005: { label: 'Seligman 외 2005 (Am Psychol): 매일 밤 좋았던 일 3가지와 이유 적기 1주, 행복감 상승·우울 감소가 6개월까지' },
-  liu2022: { label: 'Liu 외 2022 (J Pers Soc Psychol): 연락한 사람은 상대가 얼마나 반가워할지를 늘 낮춰 본다 (실험 13개)', url: 'https://pubmed.ncbi.nlm.nih.gov/35816566/' },
+  liu2022: { label: 'Liu 외 2022 (J Pers Soc Psychol): 연락한 사람은 상대가 얼마나 반가워할지를 늘 낮춰 본다', url: 'https://pubmed.ncbi.nlm.nih.gov/35816566/' },
   holtLunstad2010: { label: 'Holt-Lunstad 외 2010 (PLoS Med): 사회적 관계가 탄탄한 사람의 생존 가능성 50% 높음 (148개 연구 메타분석)', url: 'https://journals.plos.org/plosmedicine/article?id=10.1371/journal.pmed.1000316' },
   luo2024: { label: 'Luo 외 2024 (Front Psychol): 자기 전 점진적 근육 이완 7부위(힘 5~10초 · 이완 10~15초), 수면 질 개선', url: 'https://www.frontiersin.org/journals/psychology/articles/10.3389/fpsyg.2024.1337318/full' },
   zaccaro2018: { label: 'Zaccaro 외 2018 (Front Hum Neurosci): 분당 6회 안팎의 느린 호흡과 이완 반응 리뷰' },
